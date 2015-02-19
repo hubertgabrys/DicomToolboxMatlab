@@ -1,4 +1,4 @@
-function output = hg_calcdvh(dosecubes, input)
+function output = hg_calcdvh(dosecubes, strucnames)
 % This function expects as input two structures.
 % dosecubes - dosecube structure obtainable from hg_calcdicomdosecubes function
 % input - call array containing two strings which are name of two structures for which dvh is to be calculated
@@ -30,19 +30,19 @@ interp_interval = 2.5;
 interpolation = false;
 
 %% Initialization
-dv_total = zeros(length(input), 1);
-dv_min = zeros(length(input), 1);
-dv_max = zeros(length(input), 1);
-dv_mean = zeros(length(input), 1);
-dv_median = zeros(length(input), 1);
-dv_noVox = zeros(length(input), 1);
+dv_total = zeros(length(strucnames), 1);
+dv_min = zeros(length(strucnames), 1);
+dv_max = zeros(length(strucnames), 1);
+dv_mean = zeros(length(strucnames), 1);
+dv_median = zeros(length(strucnames), 1);
+dv_noVox = zeros(length(strucnames), 1);
 dvh_domain = 0:0.1:70;
 output.args = dvh_domain;
 
 for j=1:2 % for each dosecube
     %% Load dosecube
     dc = dosecubes.dosecube.dosecube;
-    indmsk = dosecubes.(input{j}).indicator_mask;
+    indmsk = dosecubes.(strucnames{j}).indicator_mask;
     % in case that there are voxels with 0 dose inside volume, change 0
     % to 0.00001 (or any small value)
     dc(dc == 0 & indmsk == 1) = 0.00001;
@@ -83,14 +83,14 @@ for j=1:2 % for each dosecube
             disp(dvh_vals(k));
         end
     end
-    output.vals.(input{j}) = dvh_vals;
+    output.vals.(strucnames{j}) = dvh_vals;
     
 end
 dv_meanBoth(1,1) = sum(dv_total)/sum(dv_noVox);
 dv_meanBoth(2,1) = sum(dv_total)/sum(dv_noVox);
 
 %% prepare output
-if length(input) == 2
+if length(strucnames) == 2
     array = [{'left';'right'} mat2cell(dv_min, [1 1]) mat2cell(dv_max, [1 1]) ...
         mat2cell(dv_mean, [1 1]) mat2cell(dv_median, [1 1]) ...
         mat2cell(dv_meanBoth, [1 1])];
