@@ -1,14 +1,14 @@
-function slice = hg_plotdose( tps_data, selected_structures, slice, contourcolor, ax )
+function slice = hg_plotct( tps_data, selected_structures, slice, contourcolor, ax )
 %
 %
 %
 % h.gabrys@dkfz.de, 2014-15
 
-cube = tps_data.dose.cube;
+cube = tps_data.ct.cube;
 %dosecube = flip(dosecube,2);
-xVec = tps_data.dose.xVec;
-yVec = tps_data.dose.yVec;
-zVec = tps_data.dose.zVec;
+xVec = tps_data.ct.xVec;
+yVec = tps_data.ct.yVec;
+zVec = tps_data.ct.zVec;
 
 if slice == -1
     slice = round(length(zVec)/2);
@@ -32,7 +32,7 @@ Z = cube(:,:,slice);
 surf(X, Y, Z, 'LineStyle', 'none');
 cmax = ceil(max(cube(:))); % this finds maximum dose in the dosecube
 caxis(ax, [0,cmax]); % this sets limits of colors on a plot
-colormap(ax, jet(1024));
+colormap(ax, gray(1024));
 if showScale
     colorbar(ax, 'location','eastoutside');
 end

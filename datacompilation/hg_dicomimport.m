@@ -1,4 +1,4 @@
-function dcs = hg_calcdicomdosecubes(rtdose_path,rtstruc_path,output_dir )
+function tps_data = hg_dicomimport(rtdose_path,rtstruc_path,ct_dir,output_dir )
 
 % hg_calcdicomdosecubes calculates dosecubes based on rtdose and rtstruc
 % dicoms
@@ -7,33 +7,194 @@ function dcs = hg_calcdicomdosecubes(rtdose_path,rtstruc_path,output_dir )
 
 %% Load a dose cube
 fprintf('Loading the dose cube...');
-[dc, dc_xVec, dc_yVec, dc_zVec] = loadDoseCube(rtdose_path, rtstruc_path);
+[dose_cube, dose_xVec, dose_yVec, dose_zVec] = loadDoseCube(rtdose_path, rtstruc_path);
 fprintf('finished!\n');
 
+%% Load a CT cube
+fprintf('Loading the CT cube...');
+[ct_cube, ct_xVec, ct_yVec, ct_zVec] = loadCTCube(ct_dir);
+fprintf('finished!\n');
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% CHOOSE HERE IF YOU WOULD LIKE TO:
+%%   1. EXPAND DC TO THE CT
+%%   2. CROP CT DO THE DC
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% Expand dose cube to the ct cube
+% x direction
+ct_xVec_e = ceil(100*round(ct_xVec,3)/100);
+dose_xVec_e = ceil(100*round(dose_xVec,3)/100);
+dose_cube_e = dose_cube;
+if ct_xVec_e(1) < dose_xVec_e(1)
+    margin = find(ct_xVec_e == dose_xVec_e(1))-1;
+    dose_xVec_e = [ct_xVec_e(1:margin);dose_xVec_e];
+    delta = margin;
+    dose_cube_e = cat(1, zeros(delta, length(dose_yVec), length(dose_zVec)), dose_cube_e);
+end
+if ct_xVec_e(end) > dose_xVec_e(end)
+    margin = find(ct_xVec_e == dose_xVec_e(end));
+    dose_xVec_e = [dose_xVec_e; ct_xVec_e(margin+1:end)];
+    delta = length(ct_xVec_e)-margin;
+    dose_cube_e = cat(1, dose_cube_e, zeros(delta, length(dose_yVec), length(dose_zVec)));
+end
+if ~isequal(ct_xVec_e,dose_xVec_e)
+    error('ct and dose vectors not equal!')
+end
+
+% y direction
+ct_yVec_e = ceil(100*round(ct_yVec,3)/100);
+dose_yVec_e = ceil(100*round(dose_yVec,3)/100);
+if ct_yVec_e(1) < dose_yVec_e(1)
+    margin = find(ct_yVec_e == dose_yVec_e(1))-1;
+    dose_yVec_e = [ct_yVec_e(1:margin);dose_yVec_e];
+    delta = margin;
+    dose_cube_e = cat(2, zeros(length(dose_xVec_e), delta, length(dose_zVec)), dose_cube_e);
+end
+if ct_yVec_e(end) > dose_yVec_e(end)
+    margin = find(ct_yVec_e == dose_yVec_e(end));
+    dose_yVec_e = [dose_yVec_e; ct_yVec_e(margin+1:end)];
+    delta = length(ct_yVec_e)-margin;
+    dose_cube_e = cat(2, dose_cube_e, zeros(length(dose_xVec_e), delta, length(dose_zVec)));
+end
+if ~isequal(ct_yVec_e,dose_yVec_e)
+    error('ct and dose vectors not equal!')
+end
+
+% z direction
+ct_zVec_e = ceil(100*round(ct_zVec,3)/100);
+dose_zVec_e = ceil(100*round(dose_zVec,3)/100);
+ct_zVec_e = flip(ct_zVec_e);
+dose_zVec_e = flip(dose_zVec_e);
+dose_cube_e = flip(dose_cube_e,3);
+if ct_zVec_e(1) < dose_zVec_e(1)
+    margin = find(ct_zVec_e == dose_zVec_e(1))-1;
+    dose_zVec_e = [ct_zVec_e(1:margin);dose_zVec_e];
+    delta = margin;
+    dose_cube_e = cat(3, zeros(length(dose_xVec_e), length(dose_yVec_e), delta), dose_cube_e);
+end
+if ct_zVec_e(end) > dose_zVec_e(end)
+    margin = find(ct_zVec_e == dose_zVec_e(end));
+    dose_zVec_e = [dose_zVec_e; ct_zVec_e(margin+1:end)];
+    delta = length(ct_zVec_e)-margin;
+    dose_cube_e = cat(3, dose_cube_e, zeros(length(dose_xVec_e), length(dose_yVec_e), delta));
+end
+ct_zVec_e = flip(ct_zVec_e);
+dose_zVec_e = flip(dose_zVec_e);
+dose_cube_e = flip(dose_cube_e,3);
+if ~isequal(ct_zVec_e,dose_zVec_e)
+    error('ct and dose vectors not equal!')
+end
+
+
+%% Crop ct cube to the dose cube
+% x direction
+ct_xVec_c = ceil(100*round(ct_xVec,3)/100);
+dose_xVec_c = ceil(100*round(dose_xVec,3)/100);
+ct_cube_c = ct_cube;
+if ct_xVec_c(1) < dose_xVec_c(1)
+    margin = find(ct_xVec_c == dose_xVec_c(1));
+    ct_xVec_c = ct_xVec_c(margin:end);
+    ct_cube_c = ct_cube_c(margin:end,:,:);
+end
+if ct_xVec_c(end) > dose_xVec_c(end)
+    margin = find(ct_xVec_c == dose_xVec_c(end));
+    ct_xVec_c = ct_xVec_c(1:margin);
+    ct_cube_c = ct_cube_c(1:margin,:,:);
+end
+if ~isequal(ct_xVec_c,dose_xVec_c)
+    error('ct and dose vectors not equal!')
+end
+
+% y direction
+ct_yVec_c = ceil(100*round(ct_yVec,3)/100);
+dose_yVec_c = ceil(100*round(dose_yVec,3)/100);
+if ct_yVec_c(1) < dose_yVec_c(1)
+    margin = find(ct_yVec_c == dose_yVec_c(1));
+    ct_yVec_c = ct_yVec_c(margin:end);
+    ct_cube_c = ct_cube_c(:,margin:end,:);
+end
+if ct_yVec_c(end) > dose_yVec_c(end)
+    margin = find(ct_yVec_c == dose_yVec_c(end));
+    ct_yVec_c = ct_yVec_c(1:margin);
+    ct_cube_c = ct_cube_c(:,1:margin,:);
+end
+if ~isequal(ct_yVec_c,dose_yVec_c)
+    error('ct and dose vectors not equal!')
+end
+
+% z direction
+ct_zVec_c = ceil(100*round(ct_zVec,3)/100);
+dose_zVec_c = ceil(100*round(dose_zVec,3)/100);
+ct_zVec_c = flip(ct_zVec_c);
+dose_zVec_c = flip(dose_zVec_c);
+ct_cube_c = flip(ct_cube_c,3);
+if ct_zVec_c(1) < dose_zVec_c(1)
+    margin = find(ct_zVec_c == dose_zVec_c(1));
+    ct_zVec_c = ct_zVec_c(margin:end);
+    ct_cube_c = ct_cube_c(:,:,margin:end);
+end
+if ct_zVec_c(end) > dose_zVec_c(end)
+    margin = find(ct_zVec_c == dose_zVec_c(end));
+    ct_zVec_c = ct_zVec_c(1:margin);
+    ct_cube_c = ct_cube_c(:,:,1:margin);
+end
+ct_zVec_c = flip(ct_zVec_c);
+dose_zVec_c = flip(dose_zVec_c);
+ct_cube_c = flip(ct_cube_c,3);
+if ~isequal(ct_zVec_c,dose_zVec_c)
+    error('ct and dose vectors not equal!')
+end
+
+
 %% Add dosecube to dosecubes structure
-dcs.dosecube.dosecube = dc;
-dcs.dosecube.dosecube_xVector = dc_xVec;
-dcs.dosecube.dosecube_yVector = dc_yVec;
-dcs.dosecube.dosecube_zVector = dc_zVec;
+tps_data.dose.cube = dose_cube;
+tps_data.dose.xVec = dose_xVec;
+tps_data.dose.yVec = dose_yVec;
+tps_data.dose.zVec = dose_zVec;
+tps_data.ct.cube = ct_cube_c;
+tps_data.ct.xVec = ct_xVec_c;
+tps_data.ct.yVec = ct_yVec_c;
+tps_data.ct.zVec = ct_zVec_c;
 
 %% Calculate structures
 if ischar(rtstruc_path)
     prefix = '';
-    dcs = calcStrucDcs(dc_xVec, dc_yVec, dc_zVec, rtstruc_path, dcs, prefix);
+    tps_data = calcStrucContours(dose_xVec, dose_yVec, dose_zVec, rtstruc_path, tps_data, prefix);
 elseif iscell(rtstruc_path) && length(rtstruc_path) == 2
     prefix = 'a_';
     disp('First structure set');
-    dcs = calcStrucDcs(dc_xVec, dc_yVec, dc_zVec, rtstruc_path{1}, dcs, prefix);
+    tps_data = calcStrucContours(dose_xVec, dose_yVec, dose_zVec, rtstruc_path{1}, tps_data, prefix);
     prefix = 'b_';
     disp('Second structure set');
-    dcs = calcStrucDcs(dc_xVec, dc_yVec, dc_zVec, rtstruc_path{2}, dcs, prefix);
+    tps_data = calcStrucContours(dose_xVec, dose_yVec, dose_zVec, rtstruc_path{2}, tps_data, prefix);
 end
 
-%% Save dosecubes as 'dosecubes.mat'
-save([output_dir 'dosecubes.mat'], 'dcs');
+%% Save dosecubes as 'tps_data.mat'
+save([output_dir 'tps_data.mat'], 'tps_data');
 disp('All structures calculated and saved to dosecubes.mat');
 end
 
+
+function [dc_ct, dc_xVec_ct, dc_yVec_ct, dc_zVec_ct] = loadCTCube(ct_dir)
+input_files_list = dir(ct_dir); % get a list of input files
+input_files_list = input_files_list(3:end); % discard first two files (which are '.' and '..')
+for i = 1:length(input_files_list) % for every file of a given patient
+    %% load dicominfo
+    input_file_filename = input_files_list(i).name; % get name of  a file
+    dicomInfo = dicominfo([ct_dir input_file_filename]);
+    series = dicomInfo.SeriesInstanceUID;
+    dc_ct(:,:,i) = dicomread(dicomInfo);
+    dc_zVec_ct(i,1) = dicomInfo.ImagePositionPatient(3);
+end
+dc_xVec_ct = dicomInfo.ImagePositionPatient(2) + (0:double(dicomInfo.Rows-1))' * dicomInfo.PixelSpacing(2);
+dc_yVec_ct = dicomInfo.ImagePositionPatient(1) + (0:double(dicomInfo.Columns-1))' * dicomInfo.PixelSpacing(1);
+
+%rounding
+% dc_xVec_ct_2 = round(ceil(1000*dc_xVec_ct)/1000,2);
+% dc_yVec_ct_2 = round(ceil(1000*dc_yVec_ct)/1000,2);
+% dc_zVec_ct_2 = round(ceil(1000*dc_zVec_ct)/1000,2);
+end
 
 function [dc, dc_xVec, dc_yVec, dc_zVec] = loadDoseCube(rtdose_path, ...
     rtstruc_path)
@@ -41,7 +202,7 @@ function [dc, dc_xVec, dc_yVec, dc_zVec] = loadDoseCube(rtdose_path, ...
 if ischar(rtdose_path) && ischar(rtstruc_path)
     [dc, dc_xVec, dc_yVec, dc_zVec] = loadRaw(rtdose_path);
     [dc, dc_xVec, dc_yVec, dc_zVec] = fixing(dc, dc_xVec, dc_yVec, dc_zVec, rtstruc_path);
-% two rtdose dicoms and one rtstruc dicom
+    % two rtdose dicoms and one rtstruc dicom
 elseif iscell(rtdose_path) && length(rtdose_path) == 2 && ischar(rtstruc_path)
     [dc1, dc_xVec1, dc_yVec1, dc_zVec1] = loadRaw(rtdose_path{1});
     [dc2, dc_xVec2, dc_yVec2, dc_zVec2] = loadRaw(rtdose_path{2});
@@ -59,7 +220,7 @@ elseif iscell(rtdose_path) && length(rtdose_path) == 2 && ischar(rtstruc_path)
     else
         error('Basic plan and boost dosecubes'' vectors are nonmatching!');
     end
-% three rtdose dicoms and one rtstruc dicom
+    % three rtdose dicoms and one rtstruc dicom
 elseif iscell(rtdose_path) && length(rtdose_path) == 3 && ischar(rtstruc_path)
     [dc1, dc_xVec1, dc_yVec1, dc_zVec1] = loadRaw(rtdose_path{1});
     [dc2, dc_xVec2, dc_yVec2, dc_zVec2] = loadRaw(rtdose_path{2});
@@ -84,8 +245,8 @@ elseif iscell(rtdose_path) && length(rtdose_path) == 3 && ischar(rtstruc_path)
     else
         error('Basic plan and boost dosecubes'' vectors are nonmatching!');
     end
-% two rtdose dicoms and two rtstruc dicoms
-%{
+    % two rtdose dicoms and two rtstruc dicoms
+    %{
 BULLSHIT!
 elseif iscell(rtdose_path) && length(rtdose_path) == 2 && iscell(rtstruc_path) && length(rtstruc_path) == 2
     [dc1, dc_xVec1, dc_yVec1, dc_zVec1] = loadRaw(rtdose_path{1});
@@ -104,7 +265,7 @@ elseif iscell(rtdose_path) && length(rtdose_path) == 2 && iscell(rtstruc_path) &
     dc(isnan(dc)) = 0;
 else
     error('Check number of input rtdose and rtstruc');
-%}
+    %}
 end
 
 
@@ -119,19 +280,19 @@ end
         dc = dc * dicomDoseInfo.DoseGridScaling;
         [dc_xVec, dc_yVec, dc_zVec] = getPatientsCoords(dicomDoseInfo);
         
-        function [xVec, yVec, zVec] = getPatientsCoords(dicomDoseInfo)
-            yVec = dicomDoseInfo.ImagePositionPatient(1) + ...
-                (0:double(dicomDoseInfo.Columns-1))' * dicomDoseInfo.PixelSpacing(1);
-            xVec = dicomDoseInfo.ImagePositionPatient(2) + ...
-                (0:double(dicomDoseInfo.Rows-1))' * dicomDoseInfo.PixelSpacing(2);
+        function [xVec, yVec, zVec] = getPatientsCoords(dicomInfo)
+            yVec = dicomInfo.ImagePositionPatient(1) + ...
+                (0:double(dicomInfo.Columns-1))' * dicomInfo.PixelSpacing(1);
+            xVec = dicomInfo.ImagePositionPatient(2) + ...
+                (0:double(dicomInfo.Rows-1))' * dicomInfo.PixelSpacing(2);
             % get offset
-            if dicomDoseInfo.GridFrameOffsetVector(1) ~= 0
-                offset = dicomDoseInfo.GridFrameOffsetVector - ...
-                    dicomDoseInfo.GridFrameOffsetVector(1);
+            if dicomInfo.GridFrameOffsetVector(1) ~= 0
+                offset = dicomInfo.GridFrameOffsetVector - ...
+                    dicomInfo.GridFrameOffsetVector(1);
             else
-                offset = dicomDoseInfo.GridFrameOffsetVector;
+                offset = dicomInfo.GridFrameOffsetVector;
             end
-            zVec = dicomDoseInfo.ImagePositionPatient(3) + offset;
+            zVec = dicomInfo.ImagePositionPatient(3) + offset;
         end
         
     end
@@ -143,6 +304,9 @@ end
         %   2.  Interpolates dosecube by means of all possible structure z
         %       coordinates
         %   3.  If there are any NaN values in cube, change them to 0
+        
+        roundprec = 3;
+        interp = 'linear';
         
         %% Flip cube if zVec is ascending
         if dc_zVec(2) - dc_zVec(1) > 0
@@ -165,12 +329,16 @@ end
         dc_yVeci = dc_yVec;
         [X1o,X2o,X3o] = ndgrid(dc_xVec, dc_yVec, dc_zVec);
         [X1i,X2i,X3i] = ndgrid(dc_xVeci, dc_yVeci, dc_zVeci);
-        dc = interpn(X1o,X2o,X3o,dc,X1i,X2i,X3i,'linear');
+        dc = interpn(X1o,X2o,X3o,dc,X1i,X2i,X3i,interp);
         %% Change NaNs to 0
         dc(isnan(dc)) = 0;
+%         dc_xVec = round(ceil(1000*dc_xVeci)/1000,2);
+%         dc_yVec = round(ceil(1000*dc_yVeci)/1000,2);
+%         dc_zVec = round(ceil(1000*dc_zVeci)/1000,2);
         dc_xVec = dc_xVeci;
         dc_yVec = dc_yVeci;
         dc_zVec = dc_zVeci;
+
         
         function zVec = findzvec(rtstruc_path)
             dicom_struc_info = dicominfo(rtstruc_path);
@@ -204,7 +372,7 @@ end
 end
 
 
-function dcs = calcStrucDcs(dc_xVec,dc_yVec,dc_zVec, rtstruc_path, dcs, prefix)
+function tps_data = calcStrucContours(dc_xVec,dc_yVec,dc_zVec, rtstruc_path, tps_data, prefix)
 dicom_struc_info = dicominfo(rtstruc_path);
 % dicomStructuresInfo.StructureSetROISequence contains a list of all
 % defined structers
@@ -234,6 +402,9 @@ for j = 1:(length(list_of_contoured_strucs)); % for every structure
     % change nonalphanumeric chars to underscore
     struc_name(~isstrprop(struc_name, 'alphanum')) = '_';
     struc_name = regexprep(struc_name,'[^a-zA-Z0-9]','_');
+    while strcmp(struc_name(end),'_')
+        struc_name(end) = '';
+    end
     % change all chars to uppercase
     struc_name = [prefix upper(struc_name)];
     fprintf('Calculating %s contours...', struc_name);
@@ -284,8 +455,8 @@ for j = 1:(length(list_of_contoured_strucs)); % for every structure
     end
     fprintf('finished!\n');
     %% Add indicator_mask and structure_vetrices to dosecubes structure
-    dcs.(struc_name).indicator_mask = indicator_mask;
-    dcs.(struc_name).structure_vetrices = struc_vetrices;
+    tps_data.structures.(struc_name).indicator_mask = indicator_mask;
+    tps_data.structures.(struc_name).structure_vetrices = struc_vetrices;
 end
 
 

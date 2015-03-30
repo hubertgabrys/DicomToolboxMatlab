@@ -22,7 +22,7 @@ function varargout = GUI_start(varargin)
 
 % Edit the above text to modify the response to help GUI_start
 
-% Last Modified by GUIDE v2.5 07-Jan-2015 12:06:58
+% Last Modified by GUIDE v2.5 30-Mar-2015 15:48:34
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -56,7 +56,8 @@ function GUI_start_OpeningFcn(hObject, eventdata, handles, varargin)
 handles.output = hObject;
 maximumNrOfStructures = 50;
 handles.selected_structures = zeros(maximumNrOfStructures,1);
-handles.defaultdatapath = 'C:\Users\gabrysh\Desktop\DICOMs\PatientData_kopfklinik\HN_compiledDICOMS\OK\';
+handles.defaultdatapath = 'C:\Users\gabrysh\Desktop\DICOMs\PatientData_kopfklinik\HN_compiledDICOMS\OK2\HN001\';
+handles.slice = -1;
 
 % Update handles structure
 guidata(hObject, handles);
@@ -168,12 +169,10 @@ oldpointer = get(handles.figure1, 'pointer');
 set(handles.figure1, 'pointer', 'watch')
 drawnow;
 
-if (handles.slice < length(handles.dosecubes.dosecube.dosecube_zVector))
-    handles.slice = handles.slice + 1;
-end
+handles.slice = handles.slice + 1;
 % Update handles structure
 guidata(hObject, handles)
-plotDose( hObject, eventdata, handles);
+handles.slice = plotDose( hObject, eventdata, handles);
 % Update handles structure
 guidata(hObject, handles)
 
@@ -192,12 +191,10 @@ oldpointer = get(handles.figure1, 'pointer');
 set(handles.figure1, 'pointer', 'watch')
 drawnow;
 
-if (handles.slice > 1)
-    handles.slice = handles.slice - 1;
-end
+handles.slice = handles.slice - 1;
 % Update handles structure
 guidata(hObject, handles)
-plotDose( hObject, eventdata, handles );
+handles.slice = plotDose( hObject, eventdata, handles );
 % Update handles structure
 guidata(hObject, handles)
 
@@ -217,12 +214,12 @@ set(handles.figure1, 'pointer', 'watch')
 drawnow;
 
 % calculate
-dosecubes = hg_calcdicomdosecubes(handles.rtdose_plan_path, handles.rtstruc_path, handles.output_directory);
-set(handles.analysisresult_text,'String', 'Dosecubes calculated!');
+tps_data = hg_dicomimport(handles.rtdose_plan_path, handles.rtstruc_path, handles.ct_dir, handles.output_directory);
+set(handles.analysisresult_text,'String', 'TPS data loaded!');
 set(hObject, 'Enable', 'off');
 set(handles.Plot_button, 'Enable', 'on');
-handles.s_fieldnames = fieldnames(dosecubes);
-handles.dosecubes = dosecubes;
+handles.s_fieldnames = fieldnames(tps_data.structures);
+handles.tps_data = tps_data;
 guidata(hObject, handles)
 enablecheckboxes(hObject, eventdata, handles)
 
@@ -240,20 +237,19 @@ oldpointer = get(handles.figure1, 'pointer');
 set(handles.figure1, 'pointer', 'watch')
 drawnow;
 
-handles.slice = 1;
 % Update handles structure
 guidata(hObject, handles)
-plotDose( hObject, eventdata, handles );
-% Update handles structure
+axes(handles.axes1);
+handles.slice = plotDose( hObject, eventdata, handles );
 guidata(hObject, handles)
 
 % set back an arrow
 set(handles.figure1, 'pointer', oldpointer)
 
 
-% --- Executes on button press in LoadDosecubes_button.
-function LoadDosecubes_button_Callback(hObject, eventdata, handles)
-% hObject    handle to LoadDosecubes_button (see GCBO)
+% --- Executes on button press in LoadTPSdata_button.
+function LoadTPSdata_button_Callback(hObject, eventdata, handles)
+% hObject    handle to LoadTPSdata_button (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
@@ -262,13 +258,13 @@ oldpointer = get(handles.figure1, 'pointer');
 set(handles.figure1, 'pointer', 'watch')
 drawnow;
 
-[filename, directory] = uigetfile([handles.defaultdatapath '*.mat'], 'Choose dosecubes.mat file...');
+[filename, directory] = uigetfile([handles.defaultdatapath '*.mat'], 'Choose tps_data.mat file...');
 load([directory '\' filename]);
-dosecubes = dcs;
+tps_data = tps_data;
 handles.output_directory = directory;
-handles.s_fieldnames = fieldnames(dosecubes);
+handles.s_fieldnames = fieldnames(tps_data.structures);
 setPatName(handles);
-handles.dosecubes = dosecubes;
+handles.tps_data = tps_data;
 set(handles.Plot_button, 'Enable', 'on');
 guidata(hObject, handles);
 enablecheckboxes(hObject, eventdata, handles)
@@ -779,9 +775,9 @@ checkboxmanager(51, hObject, eventdata, handles);
 
 function enablecheckboxes(hObject, eventdata, handles)
 % set checkbox names
-for loopIndex = 2:numel(handles.s_fieldnames)
-    set(eval(['handles.structure' num2str(loopIndex-1) '_checkbox']), 'String', handles.s_fieldnames{loopIndex})
-    set(eval(['handles.structure' num2str(loopIndex-1) '_checkbox']), 'Visible', 'on')
+for loopIndex = 1:numel(handles.s_fieldnames)
+    set(eval(['handles.structure' num2str(loopIndex) '_checkbox']), 'String', handles.s_fieldnames{loopIndex})
+    set(eval(['handles.structure' num2str(loopIndex) '_checkbox']), 'Visible', 'on')
 end
 
 
@@ -853,7 +849,7 @@ switch contents
         tmp = lookForEnabledCheckboxes(hObject, eventdata, handles);
         leStr = handles.s_fieldnames{tmp};
         clearCheckboxes(hObject, eventdata, handles);
-        flag = checkStructureCube_eye2(handles.dosecubes, rpStr, leStr);
+        flag = checkStructureCube_eye2(handles.tps_data, rpStr, leStr);
         setTestResult(handles, flag);
         
     case 2 %Check structure cube (parotid, lung)
@@ -874,7 +870,7 @@ switch contents
         tmp = lookForEnabledCheckboxes(hObject, eventdata, handles);
         leStr = handles.s_fieldnames{tmp};
         clearCheckboxes(hObject, eventdata, handles);
-        flag = checkStructureCube_lung2(handles.dosecubes, rpStr, leStr);
+        flag = checkStructureCube_lung2(handles.tps_data, rpStr, leStr);
         setTestResult(handles, flag);
         
     case 3 %Calculate moments
@@ -910,7 +906,7 @@ switch contents
         clearCheckboxes(hObject, eventdata, handles);
         %}
         % calculate moments
-        %calculateMoments(handles.dosecubes, struct, location, side, handles.output_directory);
+        %calculateMoments(handles.tps_data, struct, location, side, handles.output_directory);
         set(handles.analysisresult_text,'String', 'Not implemented yet!');
         set(handles.analysisresult_text,'ForegroundColor', [0 0.5 0]);
         %{
@@ -943,7 +939,7 @@ switch contents
         set(handles.uipanel3,'Visible', 'off');
         clearCheckboxes(hObject, eventdata, handles);
         
-        calculateMoments2(handles.dosecubes, {ipsipar, contrapar}, side, handles.output_directory);
+        calculateMoments2(handles.tps_data, {ipsipar, contrapar}, side, handles.output_directory);
         
         set(handles.analysisresult_text,'String', 'Moments calculated!');
         set(handles.analysisresult_text,'ForegroundColor', [0 0.5 0]);
@@ -975,7 +971,7 @@ switch contents
         clearCheckboxes(hObject, eventdata, handles);
         
         % calculate
-        calculateMoments3(handles.dosecubes, {leftpar, rightpar}, handles.output_directory);
+        calculateMoments3(handles.tps_data, {leftpar, rightpar}, handles.output_directory);
         
         % inform when finished
         set(handles.analysisresult_text,'String', 'Moments calculated!');
@@ -993,15 +989,15 @@ switch contents
         set(handles.analysisresult_text,'String', 'Choose structures for dvh calculation');
         uiwait;
         struct_sel = lookForEnabledCheckboxes2(hObject, eventdata, handles);
-        dvh = hg_calcdvh(handles.dosecubes, handles.s_fieldnames(struct_sel == 1));
+        dvh = hg_calcdvh(handles.tps_data, handles.s_fieldnames(struct_sel == 1));
         writetable(dvh.array, [handles.output_directory 'dvh.txt']);
         % dvh plot
         struct_sel = find(struct_sel == 1);
         for j=1:length(struct_sel)
             linecolor = get(eval(['handles.structure' ...
-                num2str(struct_sel(j)-1) '_checkbox']), 'ForegroundColor');
+                num2str(struct_sel(j)) '_checkbox']), 'ForegroundColor');
             title = handles.s_fieldnames{struct_sel(j)};
-            hg_plotdvh(dvh.args, dvh.vals.(title), linecolor, title);
+            hg_plotdvh(dvh.args, dvh.vals.(title), linecolor, title, handles.axes3);
             hold on;
         end
         hold off;
@@ -1016,14 +1012,22 @@ switch contents
         set(handles.analysisresult_text,'ForegroundColor', [0 0.5 0]);
 end
 
-function plotDose(hObject, eventdata, handles)
+function slice = plotDose(hObject, eventdata, handles)
 struct_sel = lookForEnabledCheckboxes2(hObject, eventdata, handles);
 if sum(struct_sel) == 0
     colors = [0 0 0];
 else
     colors = getCheckboxColors(hObject, eventdata, handles);
 end
-hg_plotdose(handles.dosecubes, handles.s_fieldnames(struct_sel == 1), handles.slice, colors);
+% if handles.slice ~= -1
+%     shift = (handles.tps_data.ct.zVec(handles.slice)-handles.tps_data.dose.zVec(handles.slice))/(handles.tps_data.ct.zVec(1)-handles.tps_data.ct.zVec(2)); % I NEED MORE ELEGANT SOLUTION!!!
+% else
+%     shift = 0;
+% end
+hg_plotct(handles.tps_data, handles.s_fieldnames(struct_sel == 1), handles.slice, colors, handles.axes1);
+slice = hg_plotdose(handles.tps_data, handles.s_fieldnames(struct_sel == 1), handles.slice, colors, handles.axes2);
+%handles.slice = slice;
+%guidata(hObject, handles)
 
 
 
@@ -1038,8 +1042,8 @@ end
 
 function index = lookForEnabledCheckboxes(hObject, eventdata, handles)
 % set checkbox names
-for loopIndex = 2:numel(handles.s_fieldnames)
-    value = get(eval(['handles.structure' num2str(loopIndex-1) '_checkbox']), 'Value');
+for loopIndex = 1:numel(handles.s_fieldnames)
+    value = get(eval(['handles.structure' num2str(loopIndex) '_checkbox']), 'Value');
     if value
         index = loopIndex;
     end
@@ -1047,9 +1051,9 @@ end
 
 function index = lookForEnabledCheckboxes2(hObject, eventdata, handles)
 % set checkbox names
-index = zeros(numel(handles.s_fieldnames)-1,1);
-for loopIndex = 2:numel(handles.s_fieldnames)
-    value = get(eval(['handles.structure' num2str(loopIndex-1) '_checkbox']), 'Value');
+index = zeros(numel(handles.s_fieldnames),1);
+for loopIndex = 1:numel(handles.s_fieldnames)
+    value = get(eval(['handles.structure' num2str(loopIndex) '_checkbox']), 'Value');
     if value
         index(loopIndex) = 1;
     end
@@ -1059,20 +1063,20 @@ function colors = getCheckboxColors(hObject, eventdata, handles)
 % set checkbox names
 %colors = zeros(numel(handles.s_fieldnames)-1,3);
 index = 1;
-for loopIndex = 2:numel(handles.s_fieldnames)
-    value = get(eval(['handles.structure' num2str(loopIndex-1) '_checkbox']), 'Value');
+for loopIndex = 1:numel(handles.s_fieldnames)
+    value = get(eval(['handles.structure' num2str(loopIndex) '_checkbox']), 'Value');
     if value
-        colors(index,:) = get(eval(['handles.structure' num2str(loopIndex-1) '_checkbox']), 'ForegroundColor');
+        colors(index,:) = get(eval(['handles.structure' num2str(loopIndex) '_checkbox']), 'ForegroundColor');
         index = index+1;
     end
 end
 
 function clearCheckboxes(hObject, eventdata, handles)
 % set checkbox names
-for loopIndex = 2:numel(handles.s_fieldnames)
-    set(eval(['handles.structure' num2str(loopIndex-1) '_checkbox']), 'Value', 0);
-    set(eval(['handles.structure' num2str(loopIndex-1) '_checkbox']), 'ForegroundColor', [0 0 0]);
-    set(eval(['handles.structure' num2str(loopIndex-1) '_checkbox']), 'BackgroundColor', [1 1 1]);
+for loopIndex = 1:numel(handles.s_fieldnames)
+    set(eval(['handles.structure' num2str(loopIndex) '_checkbox']), 'Value', 0);
+    set(eval(['handles.structure' num2str(loopIndex) '_checkbox']), 'ForegroundColor', [0 0 0]);
+    set(eval(['handles.structure' num2str(loopIndex) '_checkbox']), 'BackgroundColor', [1 1 1]);
 end
 handles.selected_structures = handles.selected_structures * 0;
 guidata(hObject, handles);
@@ -1155,4 +1159,14 @@ temp{2} = [directory filename];
 %temp{2} = loadRTDosePlan();
 handles.rtdose_plan_path = temp;
 % Update handles structure
+guidata(hObject, handles)
+
+
+% --- Executes on button press in LoadCT.
+function LoadCT_Callback(hObject, eventdata, handles)
+% hObject    handle to LoadCT (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+ct_dir = uigetdir(handles.defaultdatapath, 'Choose Output Directory...');
+handles.ct_dir = [ct_dir '\'];
 guidata(hObject, handles)

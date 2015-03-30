@@ -76,7 +76,7 @@ for j = 1:2
         end
         
         %% Calculate moments
-        for k = 1:length(mom_def) % for every moment setup
+        for k = 1:size(mom_def,1) % for every moment setup
             mom_val(iterator,k) = hg_calcmom3d(struct_dc2, mom_def(k,1), mom_def(k,2), mom_def(k,3),'scale');
             % if the model was trained by taking into account dimensional
             % factor (interp_interval) then another normalization factor
