@@ -22,7 +22,7 @@ function varargout = GUI_start(varargin)
 
 % Edit the above text to modify the response to help GUI_start
 
-% Last Modified by GUIDE v2.5 30-Mar-2015 15:48:34
+% Last Modified by GUIDE v2.5 08-Apr-2015 17:04:44
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -1170,3 +1170,28 @@ function LoadCT_Callback(hObject, eventdata, handles)
 ct_dir = uigetdir(handles.defaultdatapath, 'Choose Output Directory...');
 handles.ct_dir = [ct_dir '\'];
 guidata(hObject, handles)
+
+
+% --- Executes on button press in calcFeatures.
+function calcFeatures_Callback(hObject, eventdata, handles)
+% hObject    handle to calcFeatures (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+descriptors = calculateFeatures(handles.tps_data);
+writetable(descriptors, [handles.output_directory 'descriptors.dat'], 'Delimiter','\t');
+%writetable(descriptors, [handles.output_directory 'descriptors.xlsx']); %
+%runns much slower than exporting to csv
+
+
+% --- Executes on button press in select_all_button.
+function select_all_button_Callback(hObject, eventdata, handles)
+% hObject    handle to select_all_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in select_none_button.
+function select_none_button_Callback(hObject, eventdata, handles)
+% hObject    handle to select_none_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)

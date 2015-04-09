@@ -21,105 +21,103 @@ fprintf('finished!\n');
 %%   2. CROP CT DO THE DC
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%% Expand dose cube to the ct cube
-% x direction
-ct_xVec_e = ceil(100*round(ct_xVec,3)/100);
-dose_xVec_e = ceil(100*round(dose_xVec,3)/100);
-dose_cube_e = dose_cube;
-if ct_xVec_e(1) < dose_xVec_e(1)
-    margin = find(ct_xVec_e == dose_xVec_e(1))-1;
-    dose_xVec_e = [ct_xVec_e(1:margin);dose_xVec_e];
-    delta = margin;
-    dose_cube_e = cat(1, zeros(delta, length(dose_yVec), length(dose_zVec)), dose_cube_e);
-end
-if ct_xVec_e(end) > dose_xVec_e(end)
-    margin = find(ct_xVec_e == dose_xVec_e(end));
-    dose_xVec_e = [dose_xVec_e; ct_xVec_e(margin+1:end)];
-    delta = length(ct_xVec_e)-margin;
-    dose_cube_e = cat(1, dose_cube_e, zeros(delta, length(dose_yVec), length(dose_zVec)));
-end
-if ~isequal(ct_xVec_e,dose_xVec_e)
-    error('ct and dose vectors not equal!')
-end
-
-% y direction
-ct_yVec_e = ceil(100*round(ct_yVec,3)/100);
-dose_yVec_e = ceil(100*round(dose_yVec,3)/100);
-if ct_yVec_e(1) < dose_yVec_e(1)
-    margin = find(ct_yVec_e == dose_yVec_e(1))-1;
-    dose_yVec_e = [ct_yVec_e(1:margin);dose_yVec_e];
-    delta = margin;
-    dose_cube_e = cat(2, zeros(length(dose_xVec_e), delta, length(dose_zVec)), dose_cube_e);
-end
-if ct_yVec_e(end) > dose_yVec_e(end)
-    margin = find(ct_yVec_e == dose_yVec_e(end));
-    dose_yVec_e = [dose_yVec_e; ct_yVec_e(margin+1:end)];
-    delta = length(ct_yVec_e)-margin;
-    dose_cube_e = cat(2, dose_cube_e, zeros(length(dose_xVec_e), delta, length(dose_zVec)));
-end
-if ~isequal(ct_yVec_e,dose_yVec_e)
-    error('ct and dose vectors not equal!')
-end
-
-% z direction
-ct_zVec_e = ceil(100*round(ct_zVec,3)/100);
-dose_zVec_e = ceil(100*round(dose_zVec,3)/100);
-ct_zVec_e = flip(ct_zVec_e);
-dose_zVec_e = flip(dose_zVec_e);
-dose_cube_e = flip(dose_cube_e,3);
-if ct_zVec_e(1) < dose_zVec_e(1)
-    margin = find(ct_zVec_e == dose_zVec_e(1))-1;
-    dose_zVec_e = [ct_zVec_e(1:margin);dose_zVec_e];
-    delta = margin;
-    dose_cube_e = cat(3, zeros(length(dose_xVec_e), length(dose_yVec_e), delta), dose_cube_e);
-end
-if ct_zVec_e(end) > dose_zVec_e(end)
-    margin = find(ct_zVec_e == dose_zVec_e(end));
-    dose_zVec_e = [dose_zVec_e; ct_zVec_e(margin+1:end)];
-    delta = length(ct_zVec_e)-margin;
-    dose_cube_e = cat(3, dose_cube_e, zeros(length(dose_xVec_e), length(dose_yVec_e), delta));
-end
-ct_zVec_e = flip(ct_zVec_e);
-dose_zVec_e = flip(dose_zVec_e);
-dose_cube_e = flip(dose_cube_e,3);
-if ~isequal(ct_zVec_e,dose_zVec_e)
-    error('ct and dose vectors not equal!')
-end
+% %% Expand dose cube to the ct cube
+% % x direction
+% ct_xVec_e = ceil(100*round(ct_xVec,3)/100);
+% dose_xVec_e = ceil(100*round(dose_xVec,3)/100);
+% dose_cube_e = dose_cube;
+% if ct_xVec_e(1) < dose_xVec_e(1)
+%     margin = find(ct_xVec_e == dose_xVec_e(1))-1;
+%     dose_xVec_e = [ct_xVec_e(1:margin);dose_xVec_e];
+%     delta = margin;
+%     dose_cube_e = cat(1, zeros(delta, length(dose_yVec), length(dose_zVec)), dose_cube_e);
+% end
+% if ct_xVec_e(end) > dose_xVec_e(end)
+%     margin = find(ct_xVec_e == dose_xVec_e(end));
+%     dose_xVec_e = [dose_xVec_e; ct_xVec_e(margin+1:end)];
+%     delta = length(ct_xVec_e)-margin;
+%     dose_cube_e = cat(1, dose_cube_e, zeros(delta, length(dose_yVec), length(dose_zVec)));
+% end
+% if ~isequal(ct_xVec_e,dose_xVec_e)
+%     error('ct and dose vectors not equal!')
+% end
+% 
+% % y direction
+% ct_yVec_e = ceil(100*round(ct_yVec,3)/100);
+% dose_yVec_e = ceil(100*round(dose_yVec,3)/100);
+% if ct_yVec_e(1) < dose_yVec_e(1)
+%     margin = find(ct_yVec_e == dose_yVec_e(1))-1;
+%     dose_yVec_e = [ct_yVec_e(1:margin);dose_yVec_e];
+%     delta = margin;
+%     dose_cube_e = cat(2, zeros(length(dose_xVec_e), delta, length(dose_zVec)), dose_cube_e);
+% end
+% if ct_yVec_e(end) > dose_yVec_e(end)
+%     margin = find(ct_yVec_e == dose_yVec_e(end));
+%     dose_yVec_e = [dose_yVec_e; ct_yVec_e(margin+1:end)];
+%     delta = length(ct_yVec_e)-margin;
+%     dose_cube_e = cat(2, dose_cube_e, zeros(length(dose_xVec_e), delta, length(dose_zVec)));
+% end
+% if ~isequal(ct_yVec_e,dose_yVec_e)
+%     error('ct and dose vectors not equal!')
+% end
+% 
+% % z direction
+% ct_zVec_e = ceil(100*round(ct_zVec,3)/100);
+% dose_zVec_e = ceil(100*round(dose_zVec,3)/100);
+% ct_zVec_e = flip(ct_zVec_e);
+% dose_zVec_e = flip(dose_zVec_e);
+% dose_cube_e = flip(dose_cube_e,3);
+% if ct_zVec_e(1) < dose_zVec_e(1)
+%     margin = find(ct_zVec_e == dose_zVec_e(1))-1;
+%     dose_zVec_e = [ct_zVec_e(1:margin);dose_zVec_e];
+%     delta = margin;
+%     dose_cube_e = cat(3, zeros(length(dose_xVec_e), length(dose_yVec_e), delta), dose_cube_e);
+% end
+% if ct_zVec_e(end) > dose_zVec_e(end)
+%     margin = find(ct_zVec_e == dose_zVec_e(end));
+%     dose_zVec_e = [dose_zVec_e; ct_zVec_e(margin+1:end)];
+%     delta = length(ct_zVec_e)-margin;
+%     dose_cube_e = cat(3, dose_cube_e, zeros(length(dose_xVec_e), length(dose_yVec_e), delta));
+% end
+% ct_zVec_e = flip(ct_zVec_e);
+% dose_zVec_e = flip(dose_zVec_e);
+% dose_cube_e = flip(dose_cube_e,3);
+% if ~isequal(ct_zVec_e,dose_zVec_e)
+%     error('ct and dose vectors not equal!')
+% end
 
 
 %% Crop ct cube to the dose cube
 % x direction
 ct_xVec_c = ceil(100*round(ct_xVec,3)/100);
 dose_xVec_c = ceil(100*round(dose_xVec,3)/100);
-ct_cube_c = ct_cube;
-if ct_xVec_c(1) < dose_xVec_c(1)
-    margin = find(ct_xVec_c == dose_xVec_c(1));
-    ct_xVec_c = ct_xVec_c(margin:end);
-    ct_cube_c = ct_cube_c(margin:end,:,:);
+ct_cube_new = ct_cube;
+if ct_xVec_c(1) <= dose_xVec_c(1)
+    margin_start = find(ct_xVec_c == dose_xVec_c(1));
 end
-if ct_xVec_c(end) > dose_xVec_c(end)
-    margin = find(ct_xVec_c == dose_xVec_c(end));
-    ct_xVec_c = ct_xVec_c(1:margin);
-    ct_cube_c = ct_cube_c(1:margin,:,:);
+if ct_xVec_c(end) >= dose_xVec_c(end)
+    margin_end = find(ct_xVec_c == dose_xVec_c(end));
 end
-if ~isequal(ct_xVec_c,dose_xVec_c)
+ct_xVec_new = ct_xVec(margin_start:margin_end);
+ct_cube_new = ct_cube_new(margin_start:margin_end,:,:);
+diff = mean(abs(ct_xVec_new-dose_xVec));
+if diff > 0.01 % allow some small difference
     error('ct and dose vectors not equal!')
 end
 
 % y direction
 ct_yVec_c = ceil(100*round(ct_yVec,3)/100);
 dose_yVec_c = ceil(100*round(dose_yVec,3)/100);
-if ct_yVec_c(1) < dose_yVec_c(1)
-    margin = find(ct_yVec_c == dose_yVec_c(1));
-    ct_yVec_c = ct_yVec_c(margin:end);
-    ct_cube_c = ct_cube_c(:,margin:end,:);
+if ct_yVec_c(1) <= dose_yVec_c(1)
+    margin_start = find(ct_yVec_c == dose_yVec_c(1));
 end
-if ct_yVec_c(end) > dose_yVec_c(end)
-    margin = find(ct_yVec_c == dose_yVec_c(end));
-    ct_yVec_c = ct_yVec_c(1:margin);
-    ct_cube_c = ct_cube_c(:,1:margin,:);
+if ct_yVec_c(end) >= dose_yVec_c(end)
+    margin_end = find(ct_yVec_c == dose_yVec_c(end));
 end
-if ~isequal(ct_yVec_c,dose_yVec_c)
+ct_yVec_new = ct_yVec(margin_start:margin_end);
+ct_cube_new = ct_cube_new(:,margin_start:margin_end,:);
+diff = mean(abs(ct_yVec_new-dose_yVec));
+if diff > 0.01 % allow some small difference
     error('ct and dose vectors not equal!')
 end
 
@@ -127,22 +125,23 @@ end
 ct_zVec_c = ceil(100*round(ct_zVec,3)/100);
 dose_zVec_c = ceil(100*round(dose_zVec,3)/100);
 ct_zVec_c = flip(ct_zVec_c);
+ct_zVec = flip(ct_zVec);
 dose_zVec_c = flip(dose_zVec_c);
-ct_cube_c = flip(ct_cube_c,3);
-if ct_zVec_c(1) < dose_zVec_c(1)
-    margin = find(ct_zVec_c == dose_zVec_c(1));
-    ct_zVec_c = ct_zVec_c(margin:end);
-    ct_cube_c = ct_cube_c(:,:,margin:end);
+ct_cube_new = flip(ct_cube_new,3);
+if ct_zVec_c(1) <= dose_zVec_c(1)
+    margin_start = find(ct_zVec_c == dose_zVec_c(1));
 end
-if ct_zVec_c(end) > dose_zVec_c(end)
-    margin = find(ct_zVec_c == dose_zVec_c(end));
-    ct_zVec_c = ct_zVec_c(1:margin);
-    ct_cube_c = ct_cube_c(:,:,1:margin);
+if ct_zVec_c(end) >= dose_zVec_c(end)
+    margin_end = find(ct_zVec_c == dose_zVec_c(end));
 end
-ct_zVec_c = flip(ct_zVec_c);
-dose_zVec_c = flip(dose_zVec_c);
-ct_cube_c = flip(ct_cube_c,3);
-if ~isequal(ct_zVec_c,dose_zVec_c)
+ct_zVec_new = ct_zVec(margin_start:margin_end);
+ct_cube_new = ct_cube_new(:,:,margin_start:margin_end);
+ct_zVec_new = flip(ct_zVec_new);
+%dose_zVec_new = flip(dose_zVec_new);
+ct_cube_new = flip(ct_cube_new,3);
+%ct_zVec = flip(ct_zVec);
+diff = mean(abs(ct_zVec_new-dose_zVec));
+if diff > 0.01 % allow some small difference
     error('ct and dose vectors not equal!')
 end
 
@@ -152,10 +151,10 @@ tps_data.dose.cube = dose_cube;
 tps_data.dose.xVec = dose_xVec;
 tps_data.dose.yVec = dose_yVec;
 tps_data.dose.zVec = dose_zVec;
-tps_data.ct.cube = ct_cube_c;
-tps_data.ct.xVec = ct_xVec_c;
-tps_data.ct.yVec = ct_yVec_c;
-tps_data.ct.zVec = ct_zVec_c;
+tps_data.ct.cube = ct_cube_new;
+tps_data.ct.xVec = ct_xVec_new;
+tps_data.ct.yVec = ct_yVec_new;
+tps_data.ct.zVec = ct_zVec_new;
 
 %% Calculate structures
 if ischar(rtstruc_path)

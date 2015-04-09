@@ -1,0 +1,81 @@
+function output = calculateFeatures( tps_data )
+%calculateFeatures calls various functions to calculate dosimetric and ct
+%descriptors of the structures.
+%   tps_data - ct, dosimetric, and structure data from treatment planning system
+%   strucnames - names of structures
+
+
+strucnames = fieldnames(tps_data.structures);
+
+for i=1:length(strucnames)
+    strucname = strucnames{i};
+        
+    %% DOSIMETRIC
+    % this part requires revision. it will be better to have separate
+    % functions for different dosimetric descripotors. The functions will
+    % get binary 3-dimensional structures as input eg:
+    % dvh = hg_calcdvh(struct_cube);
+    % min = hg_calc???(struct_cube, 'min');
+    % mean = hg_calc???(struct_cube, 'mean');
+    % max = hg_calc???(struct_cube, 'max');
+    % moments = hg_calcmoments(struct_cube, mom_def);
+    
+    % dose-volume
+    dvh = hg_calcdvh(tps_data, strucname);
+    dvh = dvh.array;
+    
+    % spatial moments
+    %mom_def = [0 0 0; eye(3); 1 1 0; 1 0 1; 0 1 1; 1 1 1; 2*eye(3); 3*eye(3)];
+    mom_def = npermutek(0:4,3);
+    moments = hg_calcdosemoments(tps_data, strucname, mom_def);
+    
+    % merge results
+    if exist('dosimetric_features', 'var')
+        dosimetric_features = [dosimetric_features; [dvh, moments]];
+    else
+        dosimetric_features = [dvh, moments];
+    end
+    
+    %% CT
+    struct_cube = hg_loadcube(tps_data, strucname, 'ct' );
+    struct_cube_mask = struct_cube>0;
+    xspacing = tps_data.ct.xVec(2)-tps_data.ct.xVec(1);
+    yspacing = tps_data.ct.yVec(2)-tps_data.ct.yVec(1);
+    zspacing = tps_data.ct.zVec(1)-tps_data.ct.zVec(2);
+    
+    % Area
+    struc_area = calcStrucArea(struct_cube_mask, xspacing, yspacing, zspacing);
+    
+    % Volume 3D
+    struc_volume = calcStrucVolume(struct_cube_mask, xspacing, yspacing, zspacing);
+    
+    % Asymetry
+        
+    
+    % Compactness
+    
+    
+    % Density
+    
+    
+    % Roundness
+    
+    
+    % Sphericity
+    
+    % merge results
+    if exist('ct_features', 'var')
+        ct_features = [ct_features; table(struc_area, struc_volume, 'VariableNames', {'area', 'volume'})];
+    else
+        ct_features = table(struc_area, struc_volume, 'VariableNames', {'area', 'volume'});
+    end
+    
+    
+    fprintf('Features for %s calculated!\n', strucname);
+end
+
+%% output
+strucnames = table(strucnames, 'VariableNames', {'somename'});
+output = [strucnames, dosimetric_features, ct_features];
+
+end
