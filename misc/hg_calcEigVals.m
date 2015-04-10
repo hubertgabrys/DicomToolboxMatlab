@@ -25,4 +25,3 @@ covmat = covmat/mu_000;
 
 eigvals = eig(covmat);
 end
-
