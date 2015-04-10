@@ -11,6 +11,7 @@ for i=1:length(strucnames)
     strucname = strucnames{i};
         
     %% DOSIMETRIC
+    struct_cube = hg_loadcube(tps_data, strucname, 'dose', 'false' );
     % this part requires revision. it will be better to have separate
     % functions for different dosimetric descripotors. The functions will
     % get binary 3-dimensional structures as input eg:
@@ -21,13 +22,14 @@ for i=1:length(strucnames)
     % moments = hg_calcmoments(struct_cube, mom_def);
     
     % dose-volume
-    dvh = hg_calcdvh(tps_data, strucname);
+    dvh = hg_calcdvh(struct_cube);
     dvh = dvh.array;
     
     % spatial moments
+    struct_cube = hg_loadcube(tps_data, strucname, 'dose', 'true' );
     %mom_def = [0 0 0; eye(3); 1 1 0; 1 0 1; 0 1 1; 1 1 1; 2*eye(3); 3*eye(3)];
     mom_def = npermutek(0:4,3);
-    moments = hg_calcdosemoments(tps_data, strucname, mom_def);
+    moments = hg_calcdosemoments(struct_cube, mom_def);
     
     % merge results
     if exist('dosimetric_features', 'var')
@@ -37,11 +39,14 @@ for i=1:length(strucnames)
     end
     
     %% CT
-    struct_cube = hg_loadcube(tps_data, strucname, 'ct' );
+    struct_cube = hg_loadcube(tps_data, strucname, 'ct', 'false' );
     struct_cube_mask = struct_cube>0;
     xspacing = tps_data.ct.xVec(2)-tps_data.ct.xVec(1);
     yspacing = tps_data.ct.yVec(2)-tps_data.ct.yVec(1);
     zspacing = tps_data.ct.zVec(1)-tps_data.ct.zVec(2);
+%     xspacing = 1;
+%     yspacing = 1;
+%     zspacing = 1;
     
     % Area
     struc_area = calcStrucArea(struct_cube_mask, xspacing, yspacing, zspacing);
@@ -49,25 +54,29 @@ for i=1:length(strucnames)
     % Volume 3D
     struc_volume = calcStrucVolume(struct_cube_mask, xspacing, yspacing, zspacing);
     
-    % Asymetry
-        
+    % Eccentricity
+    struc_eccentricity = calcStrucEccentricity(struct_cube_mask, xspacing, yspacing, zspacing);    
     
     % Compactness
-    
+    struc_compactness = hg_calcStructCompactness(struct_cube_mask, xspacing, yspacing, zspacing);    
     
     % Density
-    
+    struc_density = hg_calcStructDensity(struct_cube_mask, xspacing, yspacing, zspacing);    
     
     % Roundness
     
     
     % Sphericity
+    struc_sphericity = hg_calcStructSphericity(struct_cube_mask, xspacing, yspacing, zspacing);
     
     % merge results
+    variablenames = {'area', 'volume', 'eccentricity', 'compactness', 'density', 'sphericity'};
     if exist('ct_features', 'var')
-        ct_features = [ct_features; table(struc_area, struc_volume, 'VariableNames', {'area', 'volume'})];
+        ct_features = [ct_features; table(struc_area, struc_volume, struc_eccentricity, struc_compactness, ...
+            struc_density, struc_sphericity, 'VariableNames', variablenames)];
     else
-        ct_features = table(struc_area, struc_volume, 'VariableNames', {'area', 'volume'});
+        ct_features = table(struc_area, struc_volume, struc_eccentricity, struc_compactness,...
+            struc_density, struc_sphericity, 'VariableNames', variablenames);
     end
     
     
@@ -75,7 +84,7 @@ for i=1:length(strucnames)
 end
 
 %% output
-strucnames = table(strucnames, 'VariableNames', {'somename'});
+strucnames = table(strucnames, 'VariableNames', {'structure'});
 output = [strucnames, dosimetric_features, ct_features];
 
 end

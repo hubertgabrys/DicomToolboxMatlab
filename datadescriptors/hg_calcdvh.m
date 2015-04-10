@@ -1,4 +1,4 @@
-function output = hg_calcdvh(tps_data, strucname)
+function output = hg_calcdvh(struct_cube)
 % tps_data - structure obtainable from hg_dicomimport function
 % strucname - string representing name of the structure for which dvh is to be calculated
 % output - a table containing misc parameters (mean, max, min, median dose etc.)
@@ -17,9 +17,6 @@ function output = hg_calcdvh(tps_data, strucname)
 %
 % h.gabrys@dkfz.de, 2014-15
 %
-
-%% Load cube
-struct_cube = hg_loadcube(tps_data, strucname, 'dose' );
 
 %% Initialization
 dvh_domain = 0:0.1:100;
@@ -51,7 +48,7 @@ for k=100:-1:1
     end
     dvh(1,k) = dvh_domain(idx);
 end
-output.vals.(strucname) = dvh_vals;
+output.vals = dvh_vals;
 clear tmp;
 
 %% prepare output
