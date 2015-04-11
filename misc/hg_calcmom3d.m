@@ -34,16 +34,16 @@ switch inv
         X2 = X2*x2spac;
         X3 = X3*x3spac;
         % Calculate mean values
-        x1bar2 = hg_calcmom3d(V,1,0,0,'raw')/hg_calcmom3d(V,0,0,0,'raw')*x1spac;
-        x2bar2 = hg_calcmom3d(V,0,1,0,'raw')/hg_calcmom3d(V,0,0,0,'raw')*x2spac;
-        x3bar2 = hg_calcmom3d(V,0,0,1,'raw')/hg_calcmom3d(V,0,0,0,'raw')*x3spac;
+        x1bar2 = hg_calcmom3d(V,1,0,0,'raw',x1spac, x2spac, x3spac)/hg_calcmom3d(V,0,0,0,'raw',x1spac, x2spac, x3spac);
+        x2bar2 = hg_calcmom3d(V,0,1,0,'raw',x1spac, x2spac, x3spac)/hg_calcmom3d(V,0,0,0,'raw',x1spac, x2spac, x3spac);
+        x3bar2 = hg_calcmom3d(V,0,0,1,'raw',x1spac, x2spac, x3spac)/hg_calcmom3d(V,0,0,0,'raw',x1spac, x2spac, x3spac);
         % Calculate moments
         Vq = ((X1-x1bar2).^p).*((X2-x2bar2).^q).*((X3-x3bar2).^r).*V;
         m = sum(Vq(:));
         
     case 'scale'
         % Calculate normalization factor
-        norm = (hg_calcmom3d(V,0,0,0,'trans',varargin)^((p+q+r)/3+1));
+        norm = (hg_calcmom3d(V,0,0,0,'trans',x1spac, x2spac, x3spac)^((p+q+r)/3+1));
         % Calculate moments
-        m = hg_calcmom3d(V,p,q,r,'trans',varargin)/norm;
+        m = hg_calcmom3d(V,p,q,r,'trans',x1spac, x2spac, x3spac)/norm;
 end
