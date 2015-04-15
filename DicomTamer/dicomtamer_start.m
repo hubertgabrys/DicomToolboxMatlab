@@ -1132,7 +1132,7 @@ function reset_button_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 OrigDlgH = ancestor(hObject, 'figure');
 delete(OrigDlgH);
-GUI_start();
+dicomtamer_start();
 
 
 % --- Executes on button press in loadrtstruc2_button.

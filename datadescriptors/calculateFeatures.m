@@ -69,6 +69,12 @@ for i=1:length(strucnames)
     % Sphericity
     struc_sphericity = hg_calcStructSphericity(struct_cube_mask, xspacing, yspacing, zspacing);
     
+    % Isotropy indices
+    %struc_isotropyIndices = hg_calcStructIsotropyInd(struct_cube_mask, xspacing, yspacing, zspacing);
+    
+    % Aspect ratios
+    %struc_aspectRatios = hg_calcStructAspRatios(struct_cube_mask, xspacing, yspacing, zspacing);
+    
     % merge results
     variablenames = {'area', 'volume', 'eccentricity', 'compactness', 'density', 'sphericity'};
     if exist('ct_features', 'var')
