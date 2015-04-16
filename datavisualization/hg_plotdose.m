@@ -19,7 +19,7 @@ end
 if (slice < 1)
     slice = slice+1;
 end
-disp(slice)
+%disp(slice)
 
 %% plot dose
 axes(ax)

@@ -1,35 +1,35 @@
-function varargout = GUI_start(varargin)
-% GUI_START MATLAB code for GUI_start.fig
-%      GUI_START, by itself, creates a new GUI_START or raises the existing
+function varargout = dicomtamer_start(varargin)
+% DICOMTAMER_START MATLAB code for dicomtamer_start.fig
+%      DICOMTAMER_START, by itself, creates a new DICOMTAMER_START or raises the existing
 %      singleton*.
 %
-%      H = GUI_START returns the handle to a new GUI_START or the handle to
+%      H = DICOMTAMER_START returns the handle to a new DICOMTAMER_START or the handle to
 %      the existing singleton*.
 %
-%      GUI_START('CALLBACK',hObject,eventData,handles,...) calls the local
-%      function named CALLBACK in GUI_START.M with the given input arguments.
+%      DICOMTAMER_START('CALLBACK',hObject,eventData,handles,...) calls the local
+%      function named CALLBACK in DICOMTAMER_START.M with the given input arguments.
 %
-%      GUI_START('Property','Value',...) creates a new GUI_START or raises the
+%      DICOMTAMER_START('Property','Value',...) creates a new DICOMTAMER_START or raises the
 %      existing singleton*.  Starting from the left, property value pairs are
-%      applied to the GUI before GUI_start_OpeningFcn gets called.  An
+%      applied to the GUI before dicomtamer_start_OpeningFcn gets called.  An
 %      unrecognized property name or invalid value makes property application
-%      stop.  All inputs are passed to GUI_start_OpeningFcn via varargin.
+%      stop.  All inputs are passed to dicomtamer_start_OpeningFcn via varargin.
 %
 %      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
 %      instance to run (singleton)".
 %
 % See also: GUIDE, GUIDATA, GUIHANDLES
 
-% Edit the above text to modify the response to help GUI_start
+% Edit the above text to modify the response to help dicomtamer_start
 
-% Last Modified by GUIDE v2.5 30-Mar-2015 15:48:34
+% Last Modified by GUIDE v2.5 10-Apr-2015 15:57:30
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
 gui_State = struct('gui_Name',       mfilename, ...
     'gui_Singleton',  gui_Singleton, ...
-    'gui_OpeningFcn', @GUI_start_OpeningFcn, ...
-    'gui_OutputFcn',  @GUI_start_OutputFcn, ...
+    'gui_OpeningFcn', @dicomtamer_start_OpeningFcn, ...
+    'gui_OutputFcn',  @dicomtamer_start_OutputFcn, ...
     'gui_LayoutFcn',  [] , ...
     'gui_Callback',   []);
 if nargin && ischar(varargin{1})
@@ -44,15 +44,15 @@ end
 % End initialization code - DO NOT EDIT
 
 
-% --- Executes just before GUI_start is made visible.
-function GUI_start_OpeningFcn(hObject, eventdata, handles, varargin)
+% --- Executes just before dicomtamer_start is made visible.
+function dicomtamer_start_OpeningFcn(hObject, eventdata, handles, varargin)
 % This function has no output args, see OutputFcn.
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-% varargin   command line arguments to GUI_start (see VARARGIN)
+% varargin   command line arguments to dicomtamer_start (see VARARGIN)
 
-% Choose default command line output for GUI_start
+% Choose default command line output for dicomtamer_start
 handles.output = hObject;
 maximumNrOfStructures = 50;
 handles.selected_structures = zeros(maximumNrOfStructures,1);
@@ -62,12 +62,12 @@ handles.slice = -1;
 % Update handles structure
 guidata(hObject, handles);
 
-% UIWAIT makes GUI_start wait for user response (see UIRESUME)
+% UIWAIT makes dicomtamer_start wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
 
 
 % --- Outputs from this function are returned to the command line.
-function varargout = GUI_start_OutputFcn(hObject, eventdata, handles)
+function varargout = dicomtamer_start_OutputFcn(hObject, eventdata, handles)
 % varargout  cell array for returning output args (see VARARGOUT);
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -1132,7 +1132,7 @@ function reset_button_Callback(hObject, eventdata, handles)
 % handles    structure with handles and user data (see GUIDATA)
 OrigDlgH = ancestor(hObject, 'figure');
 delete(OrigDlgH);
-GUI_start();
+dicomtamer_start();
 
 
 % --- Executes on button press in loadrtstruc2_button.
@@ -1170,3 +1170,28 @@ function LoadCT_Callback(hObject, eventdata, handles)
 ct_dir = uigetdir(handles.defaultdatapath, 'Choose Output Directory...');
 handles.ct_dir = [ct_dir '\'];
 guidata(hObject, handles)
+
+
+% --- Executes on button press in calcFeatures.
+function calcFeatures_Callback(hObject, eventdata, handles)
+% hObject    handle to calcFeatures (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+descriptors = calculateFeatures(handles.tps_data);
+writetable(descriptors, [handles.output_directory 'descriptors.dat'], 'Delimiter','\t');
+%writetable(descriptors, [handles.output_directory 'descriptors.xlsx']); %
+%runns much slower than exporting to csv
+
+
+% --- Executes on button press in select_all_button.
+function select_all_button_Callback(hObject, eventdata, handles)
+% hObject    handle to select_all_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in select_none_button.
+function select_none_button_Callback(hObject, eventdata, handles)
+% hObject    handle to select_none_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
