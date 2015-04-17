@@ -11,7 +11,7 @@ for i=1:length(strucnames)
     strucname = strucnames{i};
         
     %% DOSIMETRIC
-    struct_cube = hg_loadcube(tps_data, strucname, 'dose', 'false' );
+    struct_cube = hg_loadcube(tps_data, strucname, 'dose', false );
     % this part requires revision. it will be better to have separate
     % functions for different dosimetric descripotors. The functions will
     % get binary 3-dimensional structures as input eg:
@@ -26,7 +26,7 @@ for i=1:length(strucnames)
     dvh = dvh.array;
     
     % spatial moments
-    struct_cube = hg_loadcube(tps_data, strucname, 'dose', 'true' );
+    struct_cube = hg_loadcube(tps_data, strucname, 'dose', true );
     %mom_def = [0 0 0; eye(3); 1 1 0; 1 0 1; 0 1 1; 1 1 1; 2*eye(3); 3*eye(3)];
     mom_def = npermutek(0:4,3);
     moments = hg_calcdosemoments(struct_cube, mom_def);
@@ -39,7 +39,7 @@ for i=1:length(strucnames)
     end
     
     %% CT
-    struct_cube = hg_loadcube(tps_data, strucname, 'ct', 'false' );
+    struct_cube = hg_loadcube(tps_data, strucname, 'ct', false );
     struct_cube_mask = struct_cube>0;
     xspacing = tps_data.ct.xVec(2)-tps_data.ct.xVec(1);
     yspacing = tps_data.ct.yVec(2)-tps_data.ct.yVec(1);
