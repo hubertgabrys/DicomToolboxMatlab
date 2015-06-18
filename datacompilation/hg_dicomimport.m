@@ -1,9 +1,9 @@
 function tps_data = hg_dicomimport(rtdose_path,rtstruc_path,ct_dir,output_dir )
-
 % hg_calcdicomdosecubes calculates dosecubes based on rtdose and rtstruc
 % dicoms
 %
-% h.gabrys@dkfz.de, 2014
+% h.gabrys@dkfz.de, 2014-2015
+
 
 %% Load a dose cube
 fprintf('Loading the dose cube...');
@@ -47,9 +47,114 @@ elseif iscell(rtstruc_path) && length(rtstruc_path) == 2
 end
 
 %% Save cubes as 'tps_data.mat'
-save([output_dir 'tps_data.mat'], 'tps_data');
-disp('All structures calculated and saved to dosecubes.mat');
+%save([output_dir 'tps_data.mat'], 'tps_data');
+[FileName,PathName] = uiputfile('*','Save as...', [output_dir 'tps_data.mat']);
+if ischar(FileName)
+    save([PathName, FileName],'tps_data');
 end
+disp('All structures calculated and saved to tps_data.mat');
+end
+
+function [ fileList, patientList ] = hg_scanDicomImportFolder( patDir )
+% get information about main directory
+mainDirInfo = dir(patDir);
+% get index of subfolders
+dirIndex = [mainDirInfo.isdir];
+% list of filenames in main directory
+fileList = {mainDirInfo(~dirIndex).name}';
+patientList = 0;
+
+% create full path for all files in main directory
+if ~isempty(fileList)
+    fileList = cellfun(@(x) fullfile(patDir,x),...
+        fileList, 'UniformOutput', false);
+    
+    %% check for dicom files and differentiate patients, types, and series
+    numOfFiles = numel(fileList(:,1));
+    h = waitbar(0,'Please wait...');
+    %h.WindowStyle = 'Modal';
+    steps = numOfFiles;
+    for i = numOfFiles:-1:1
+        waitbar((numOfFiles+1-i) / steps)
+        try 
+            info = dicominfo(fileList{i});
+        catch
+            fileList(i,:) = [];
+            continue;
+        end
+        try
+            fileList{i,2} = info.Modality;
+        catch
+            fileList{i,2} = NaN;
+        end
+        try
+            fileList{i,3} = info.PatientID;
+        catch
+            fileList{i,3} = NaN;
+        end
+        try
+            fileList{i,4} = info.SeriesInstanceUID;
+        catch
+            fileList{i,4} = NaN;
+        end
+        try
+            fileList{i,5} = num2str(info.SeriesNumber);
+        catch
+            fileList{i,5} = NaN;
+        end
+        try
+            fileList{i,6} = info.PatientName.FamilyName;
+        catch
+            fileList{i,6} = NaN;
+        end
+        try
+            fileList{i,7} = info.PatientName.GivenName;
+        catch
+            fileList{i,7} = NaN;
+        end
+        try
+            fileList{i,8} = info.PatientBirthDate;
+        catch
+            fileList{i,8} = NaN;
+        end
+        try
+            if strcmp(info.Modality,'CT') || strcmp(info.Modality,'RTDOSE')
+                fileList{i,9} = num2str(info.PixelSpacing(1));
+            else
+                fileList{i,9} = NaN;
+            end
+        catch
+            fileList{i,9} = NaN;
+        end
+        try
+            if strcmp(info.Modality,'CT') || strcmp(info.Modality,'RTDOSE')
+                fileList{i,10} = num2str(info.PixelSpacing(2));
+            else
+                fileList{i,10} = NaN;
+            end
+        catch
+            fileList{i,10} = NaN;
+        end
+        try
+            if strcmp(info.Modality,'CT') || strcmp(info.Modality,'RTDOSE')
+                fileList{i,11} = num2str(info.SliceThickness);
+            else
+                fileList{i,11} = NaN;
+            end
+        catch
+            fileList{i,11} = NaN;
+        end     
+    end
+    close(h)
+    
+    if ~isempty(fileList)
+        patientList = unique(fileList(:,3));
+    end
+else
+    msgbox('Search folder empty!', 'Error','error');   
+end
+end
+
 
 function [ct_cube_new, ct_xVec_new, ct_yVec_new, ct_zVec_new] = mergeCTandDose(...
     ct_cube, ct_xVec, ct_yVec, ct_zVec, dose_cube, dose_xVec, dose_yVec, dose_zVec, method)
@@ -187,13 +292,13 @@ end
 end
 
 
-function [dc_ct, dc_xVec_ct, dc_yVec_ct, dc_zVec_ct] = loadCTCube(ct_dir)
-input_files_list = dir(ct_dir); % get a list of input files
-input_files_list = input_files_list(3:end); % discard first two files (which are '.' and '..')
+function [dc_ct, dc_xVec_ct, dc_yVec_ct, dc_zVec_ct] = loadCTCube(input_files_list)
+%input_files_list = dir(ct_dir); % get a list of input files
+%input_files_list = input_files_list(3:end); % discard first two files (which are '.' and '..')
 for i = 1:length(input_files_list) % for every file of a given patient
     %% load dicominfo
-    input_file_filename = input_files_list(i).name; % get name of  a file
-    dicomInfo = dicominfo([ct_dir input_file_filename]);
+    %input_file_filename = input_files_list(i).name; % get name of  a file
+    dicomInfo = dicominfo(input_files_list{i});
     series = dicomInfo.SeriesInstanceUID;
     dc_ct(:,:,i) = dicomread(dicomInfo);
     dc_zVec_ct(i,1) = dicomInfo.ImagePositionPatient(3);

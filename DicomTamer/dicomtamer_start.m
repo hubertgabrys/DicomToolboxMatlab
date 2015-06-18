@@ -22,7 +22,7 @@ function varargout = dicomtamer_start(varargin)
 
 % Edit the above text to modify the response to help dicomtamer_start
 
-% Last Modified by GUIDE v2.5 10-Apr-2015 15:57:30
+% Last Modified by GUIDE v2.5 18-Jun-2015 14:34:22
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -1195,3 +1195,11 @@ function select_none_button_Callback(hObject, eventdata, handles)
 % hObject    handle to select_none_button (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in newloader_button.
+function newloader_button_Callback(hObject, eventdata, handles)
+% hObject    handle to newloader_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+hg_importDicomGUI
