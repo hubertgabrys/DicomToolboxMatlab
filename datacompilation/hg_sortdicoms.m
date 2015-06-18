@@ -14,8 +14,9 @@ function hg_sortdicoms()
 % h.gabrys@dkfz.de, 2014
 
 input_directory = chooseInputDir(); % choose directory containing dicom files to be compiled
-output_directory = chooseOutputDir(); % choose directory were files after compilation are to be stored
-anonymization_key_path = chooseAnonymizationKey(); % choose file with key for anonymization of patients IDs
+output_directory = input_directory; % choose directory were files after compilation are to be stored
+%output_directory = chooseOutputDir(); % choose directory were files after compilation are to be stored
+%anonymization_key_path = chooseAnonymizationKey(); % choose file with key for anonymization of patients IDs
 
 
 input_files_list = dir(input_directory); % get a list of input files
@@ -30,14 +31,14 @@ for i = 1:length(input_files_list) % for every file of a given patient
     %% modify dicominfo
     input_file_dicominfo = fillOutMissingIDs(input_file_dicominfo);
     input_file_dicominfo = replaceNonalphanumericSymbols(input_file_dicominfo);
-    input_file_dicominfo = anonymizePatientID(input_file_dicominfo, anonymization_key_path);
+    %input_file_dicominfo = anonymizePatientID(input_file_dicominfo, anonymization_key_path);
     %% create folders
     createPatientFolders(output_directory, input_file_dicominfo);
     %% copy files
     copy2rightDir(input_directory, input_files_list(i), output_directory, input_file_dicominfo);
 end
-
 end
+
 
 function input_directory = chooseInputDir()
     uiwait(warndlg('Choose Input Directory'));
@@ -45,17 +46,6 @@ function input_directory = chooseInputDir()
     input_directory = [input_directory '\'];
 end
 
-function output_directory = chooseOutputDir()
-    uiwait(warndlg('Choose Output Directory'));
-    output_directory = uigetdir('', 'Choose Output Directory...');
-    output_directory = [output_directory '\'];
-end
-
-function anonymization_key_path = chooseAnonymizationKey()
-    uiwait(warndlg('Choose Anonymization Key'));
-    [anonymization_key_filename, anonymization_key_directory] = uigetfile('*.*', 'Choose Anonymization Key...');
-    anonymization_key_path = [anonymization_key_directory '\' anonymization_key_filename];
-end
 
 function input_file_dicominfo = fillOutMissingIDs(input_file_dicominfo)
     if isempty(input_file_dicominfo.PatientID)
@@ -69,6 +59,7 @@ function input_file_dicominfo = fillOutMissingIDs(input_file_dicominfo)
     end
 end
 
+
 function input_file_dicominfo = replaceNonalphanumericSymbols(input_file_dicominfo)
     input_file_dicominfo.PatientID(~isstrprop(input_file_dicominfo.PatientID, 'alphanum')) = ...
         '_'; % change all nonalphanumeric values in PatientID to underscore
@@ -79,6 +70,37 @@ function input_file_dicominfo = replaceNonalphanumericSymbols(input_file_dicomin
     input_file_dicominfo.Modality(~isstrprop(input_file_dicominfo.Modality, 'alphanum')) = ...
         '_'; % change all nonalphanumeric values in Modality to underscore
 end
+
+
+function copy2rightDir(input_directory, patientFilesList, output_directory, temp)
+source = [input_directory '/' patientFilesList.name];
+destination = [output_directory '/' temp.PatientID '/' temp.Modality '/' patientFilesList.name];
+copyfile(source, destination);
+copyfile(source, [output_directory '/' temp.PatientID '/batch/' patientFilesList.name]);
+end
+
+
+function createPatientFolders(output_directory, temp)
+patientPath = [output_directory '/' temp.PatientID];
+if exist(patientPath, 'dir') == 7
+    createModalityFolders(patientPath, temp);
+else
+    mkdir(patientPath);
+    mkdir([patientPath '/batch']);
+    createModalityFolders(patientPath, temp);
+end
+end
+
+
+function createModalityFolders(patientPath, temp)
+modalityPath = [patientPath '/' temp.Modality];
+if exist(modalityPath, 'dir') ~= 7
+    mkdir(modalityPath);
+end
+end
+
+
+%% LIMBO
 
 function input_file_dicominfo = anonymizePatientID (input_file_dicominfo, anonymization_key_path)
     keyCells = table2cell(readtable(anonymization_key_path, ...
@@ -123,50 +145,14 @@ function input_file_dicominfo = loadDicomInfo(input_directory, filename)
     end
 end
 
-function copy2rightDir(input_directory, patientFilesList, output_directory, temp)
-source = [input_directory '/' patientFilesList.name];
-% destination = [output_directory '/' temp.PatientID '/' temp.StudyInstanceUID '/' temp.Modality '/' patientFilesList.name];
-destination = [output_directory '/' temp.PatientID '/' temp.Modality '/' patientFilesList.name];
-% destination = [output_directory '/' temp.PatientID '/' temp.StudyInstanceUID '/' temp.SeriesInstanceUID '/' temp.Modality '/' '00' num2str(jj) '.dcm'];
-copyfile(source, destination);
+function output_directory = chooseOutputDir()
+    uiwait(warndlg('Choose Output Directory'));
+    output_directory = uigetdir('', 'Choose Output Directory...');
+    output_directory = [output_directory '\'];
 end
 
-function createPatientFolders(output_directory, temp)
-%temp.PatientID = anonymizePatientID(temp.PatientID);
-patientPath = [output_directory '/' temp.PatientID];
-if exist(patientPath, 'dir') == 7
-    %createStudyFolders(patientPath, temp);
-    createModalityFolders(patientPath, temp);
-else
-    mkdir(patientPath);
-    %createStudyFolders(patientPath, temp);
-    createModalityFolders(patientPath, temp);
-end
-end
-
-function createStudyFolders(patientPath, temp)
-studyPath = [patientPath '/' temp.StudyInstanceUID];
-if exist(studyPath, 'dir') == 7
-    createModalityFolders(studyPath, temp);
-else
-    mkdir(studyPath);
-    createModalityFolders(studyPath, temp);
-end
-end
-
-function createSeriesFolders(studyPath, temp)
-seriesPath = [studyPath '/' temp.SeriesInstanceUID];
-if exist(seriesPath, 'dir') == 7
-    createModalityFolders(seriesPath, temp);
-else
-    mkdir(seriesPath);
-    createModalityFolders(seriesPath, temp);
-end
-end
-
-function createModalityFolders(seriesPath, temp)
-modalityPath = [seriesPath '/' temp.Modality];
-if exist(modalityPath, 'dir') ~= 7
-    mkdir(modalityPath);
-end
+function anonymization_key_path = chooseAnonymizationKey()
+    uiwait(warndlg('Choose Anonymization Key'));
+    [anonymization_key_filename, anonymization_key_directory] = uigetfile('*.*', 'Choose Anonymization Key...');
+    anonymization_key_path = [anonymization_key_directory '\' anonymization_key_filename];
 end
