@@ -1,4 +1,4 @@
-function tps_data = hg_dicomimport(rtdose_path,rtstruc_path,ct_dir,output_dir )
+function tps_data = hg_dicomimport(rtdose_path,rtstruc_path,ct_paths,output_dir )
 % hg_calcdicomdosecubes calculates dosecubes based on rtdose and rtstruc
 % dicoms
 %
@@ -12,7 +12,7 @@ fprintf('finished!\n');
 
 %% Load a CT cube
 fprintf('Loading the CT cube...');
-[ct_cube, ct_xVec, ct_yVec, ct_zVec] = loadCTCube(ct_dir);
+[ct_cube, ct_xVec, ct_yVec, ct_zVec] = loadCTCube(ct_paths);
 fprintf('finished!\n');
 
 %% Merge CT cube with Dose cube
@@ -53,106 +53,6 @@ if ischar(FileName)
     save([PathName, FileName],'tps_data');
 end
 disp('All structures calculated and saved to tps_data.mat');
-end
-
-function [ fileList, patientList ] = hg_scanDicomImportFolder( patDir )
-% get information about main directory
-mainDirInfo = dir(patDir);
-% get index of subfolders
-dirIndex = [mainDirInfo.isdir];
-% list of filenames in main directory
-fileList = {mainDirInfo(~dirIndex).name}';
-patientList = 0;
-
-% create full path for all files in main directory
-if ~isempty(fileList)
-    fileList = cellfun(@(x) fullfile(patDir,x),...
-        fileList, 'UniformOutput', false);
-    
-    %% check for dicom files and differentiate patients, types, and series
-    numOfFiles = numel(fileList(:,1));
-    h = waitbar(0,'Please wait...');
-    %h.WindowStyle = 'Modal';
-    steps = numOfFiles;
-    for i = numOfFiles:-1:1
-        waitbar((numOfFiles+1-i) / steps)
-        try 
-            info = dicominfo(fileList{i});
-        catch
-            fileList(i,:) = [];
-            continue;
-        end
-        try
-            fileList{i,2} = info.Modality;
-        catch
-            fileList{i,2} = NaN;
-        end
-        try
-            fileList{i,3} = info.PatientID;
-        catch
-            fileList{i,3} = NaN;
-        end
-        try
-            fileList{i,4} = info.SeriesInstanceUID;
-        catch
-            fileList{i,4} = NaN;
-        end
-        try
-            fileList{i,5} = num2str(info.SeriesNumber);
-        catch
-            fileList{i,5} = NaN;
-        end
-        try
-            fileList{i,6} = info.PatientName.FamilyName;
-        catch
-            fileList{i,6} = NaN;
-        end
-        try
-            fileList{i,7} = info.PatientName.GivenName;
-        catch
-            fileList{i,7} = NaN;
-        end
-        try
-            fileList{i,8} = info.PatientBirthDate;
-        catch
-            fileList{i,8} = NaN;
-        end
-        try
-            if strcmp(info.Modality,'CT') || strcmp(info.Modality,'RTDOSE')
-                fileList{i,9} = num2str(info.PixelSpacing(1));
-            else
-                fileList{i,9} = NaN;
-            end
-        catch
-            fileList{i,9} = NaN;
-        end
-        try
-            if strcmp(info.Modality,'CT') || strcmp(info.Modality,'RTDOSE')
-                fileList{i,10} = num2str(info.PixelSpacing(2));
-            else
-                fileList{i,10} = NaN;
-            end
-        catch
-            fileList{i,10} = NaN;
-        end
-        try
-            if strcmp(info.Modality,'CT') || strcmp(info.Modality,'RTDOSE')
-                fileList{i,11} = num2str(info.SliceThickness);
-            else
-                fileList{i,11} = NaN;
-            end
-        catch
-            fileList{i,11} = NaN;
-        end     
-    end
-    close(h)
-    
-    if ~isempty(fileList)
-        patientList = unique(fileList(:,3));
-    end
-else
-    msgbox('Search folder empty!', 'Error','error');   
-end
 end
 
 
@@ -312,8 +212,7 @@ dc_yVec_ct = dicomInfo.ImagePositionPatient(1) + (0:double(dicomInfo.Columns-1))
 % dc_zVec_ct_2 = round(ceil(1000*dc_zVec_ct)/1000,2);
 end
 
-function [dc, dc_xVec, dc_yVec, dc_zVec] = loadDoseCube(rtdose_path, ...
-    rtstruc_path)
+function [dc, dc_xVec, dc_yVec, dc_zVec] = loadDoseCube(rtdose_path, rtstruc_path)
 % loadDoseCube
 %   1. loadRaw (get dosecube and gridvectors)
 %   2. fixing 
