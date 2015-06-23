@@ -295,7 +295,9 @@ files.rtdose = allRtdose(get(handles.rtdoseseries_listbox,'Value'),:);
 %     files.resz = str2double(get(handles.resz_edit,'String'));
 % end
 
-tps_data = hg_dicomimport(files.rtdose{1},files.rtss{1},files.ct,get(handles.dir_path_field,'String'));
+%tps_data = hg_dicomimport(files.rtdose{1},files.rtss{1},files.ct,get(handles.dir_path_field,'String'));
+default_resolution = 2.5;
+tps_data = hg_dicomimport(files.ct(:,1),files.rtss{1},files.rtdose{1},default_resolution);
 
 
 

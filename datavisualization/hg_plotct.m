@@ -1,8 +1,8 @@
 function slice = hg_plotct( tps_data, selected_structures, slice, contourcolor, ax )
 %
+% Hubert Gabrys <h.gabrys@dkfz.de>, 2014-15
+% This file is licensed under GPLv2
 %
-%
-% h.gabrys@dkfz.de, 2014-15
 
 cube = tps_data.ct.cube;
 %dosecube = flip(dosecube,2);
@@ -49,23 +49,21 @@ hold on;
 
 %% plot structure conturs
 if ~isempty(selected_structures)
-for i = 1:length(selected_structures)
-    structure = tps_data.structures.(selected_structures{i});
-    if size(structure.structure_vetrices,1) > 2
-        sliceMin = find(zVec == min(structure.structure_vetrices(2:end,3)));
-        sliceMax = find(zVec == max(structure.structure_vetrices(2:end,3)));
-        if (sliceMax < sliceMin)
-            temp = sliceMin;
-            sliceMin = sliceMax;
-            sliceMax = temp;
+    for i = 1:length(selected_structures)
+        structure = tps_data.structures.(selected_structures{i});
+        % plot interpolated contours
+        B = bwboundaries(bwperim(structure.indicator_mask(:,:,slice)),'noholes');
+        for j=1:size(B,1)
+            poly = B{j};
+            structure_xCoordinates = (poly(:,2)-1)*(yVec(2)-yVec(1))+yVec(1);
+            structure_yCoordinates = (poly(:,1)-1)*(xVec(2)-xVec(1))+xVec(1);
+            plot(ax, structure_xCoordinates,structure_yCoordinates, 'LineWidth', 1, 'Color', contourcolor(i,:));
         end
-        if and(slice <= sliceMax, slice >= sliceMin)        
-            structure_xCoordinates = structure.structure_vetrices(structure.structure_vetrices(:,3) == structure_zCoordinate,1);
-            structure_yCoordinates = structure.structure_vetrices(structure.structure_vetrices(:,3) == structure_zCoordinate,2);
-            plot(ax, structure_xCoordinates,structure_yCoordinates, 'LineWidth', 2, 'Color', contourcolor(i,:));
-        end
+        % plot original countours <- DO NOT DELETE THIS!
+        % structure_xCoordinates = structure.structure_vetrices(structure.structure_vetrices(:,3) == structure_zCoordinate,1);
+        % structure_yCoordinates = structure.structure_vetrices(structure.structure_vetrices(:,3) == structure_zCoordinate,2);
+        % plot(ax, structure_xCoordinates,structure_yCoordinates, 'LineWidth', 1, 'Color', 'Red');
     end
-end
 end
 hold off,
 end

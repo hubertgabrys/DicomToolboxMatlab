@@ -1,4 +1,13 @@
-function hg_calcStructMasks(rtss_path, xVec, yVec, zVec)
+function structures = hg_calcStructMasks(rtss_path, xVec, yVec, zVec)
+% The function calculates logical masks of structures defined in RTSTRUCT
+% dicom file. The grid is defined by the grid vectors xVec, yVec, zVec.
+% Interpolation between binary slices is based on the algorithm presented
+% in Schenk et al., Efficient semiautomatic segmentation of 3D objects in
+% medical images.
+%
+% Hubert Gabrys <h.gabrys@dkfz.de>, 2015
+% This file is licensed under GPLv2
+%
 
 % calculate structures' masks
 dicom_info = dicominfo(rtss_path);
@@ -12,7 +21,6 @@ for j = 1:length(list_of_contoured_strucs)
     for k = 1:length(list_of_slices) % for every slice in a given structure
         slice = dicom_info.ROIContourSequence.(list_of_contoured_strucs{j}).ContourSequence.(list_of_slices{k});
         [slice_mask, slice_vetrices, zCoord] = calcSliceMask(slice, xVec, yVec);
-        %struct_mask(:,:,k) = slice_mask;
         if exist('struct_vetrices', 'var')
             struct_vetrices = vertcat(struct_vetrices,slice_vetrices);
         else
@@ -40,8 +48,8 @@ for j = 1:length(list_of_contoured_strucs)
     clear x y z struct_mask_dist xi yi zi struct_mask
     struct_mask_i = struct_mask_i(:,:,:)>=0;
 
-    tps_data.structures.(struct_name).indicator_mask = struct_mask_i;
-    tps_data.structures.(struct_name).structure_vetrices = struct_vetrices;
+    structures.(struct_name).indicator_mask = struct_mask_i;
+    structures.(struct_name).structure_vetrices = struct_vetrices;
     clear struct_mask_i struct_vetrices;
 end
 
