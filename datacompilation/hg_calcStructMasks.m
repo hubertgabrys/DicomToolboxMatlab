@@ -9,48 +9,94 @@ function structures = hg_calcStructMasks(rtss_path, xVec, yVec, zVec)
 % This file is licensed under GPLv2
 %
 
+% structures to skip
+struct2skip = {'AUSSENKONTUR', 'SKIN'};
+
 % calculate structures' masks
 dicom_info = dicominfo(rtss_path);
 list_of_contoured_strucs = fieldnames(dicom_info.ROIContourSequence);
 for j = 1:length(list_of_contoured_strucs)
     roinumber  = dicom_info.ROIContourSequence.(list_of_contoured_strucs{j}).ReferencedROINumber;
     struct_name = getStructName(dicom_info,roinumber);
+    if nnz(ismember(struct2skip, struct_name))
+        continue;
+    end
     disp(struct_name)
     list_of_slices = fieldnames(dicom_info.ROIContourSequence.(list_of_contoured_strucs{j}).ContourSequence);
-    i = 0;
+    %i = 0;
+    %zCoords = zeros(length(list_of_slices),1);
+    temp_struct_mask = zeros(0);
     for k = 1:length(list_of_slices) % for every slice in a given structure
         slice = dicom_info.ROIContourSequence.(list_of_contoured_strucs{j}).ContourSequence.(list_of_slices{k});
-        [slice_mask, slice_vetrices, zCoord] = calcSliceMask(slice, xVec, yVec);
-        if exist('struct_vetrices', 'var')
-            struct_vetrices = vertcat(struct_vetrices,slice_vetrices);
-        else
-            struct_vetrices = slice_vetrices;
-        end
-        zCoords(k) = zCoord;
-        if k>1 && zCoord == zCoords(k-1)
-            struct_mask(:,:,i) = struct_mask(:,:,i)+slice_mask;
-        else
-            i = i+1;
-            struct_mask(:,:,i) = slice_mask;
+        if ~strcmpi(slice.ContourGeometricType, 'POINT')
+            [slice_mask, slice_vetrices, zCoord] = calcSliceMask(slice, xVec, yVec);
+            
+            temp_struct_mask{k,1} = zCoord;
+            temp_struct_mask{k,2} = slice_mask;
+            temp_struct_mask{k,3} = slice_vetrices;
+            
+            
+            
+%             if k == 1
+%                 struct_vetrices = slice_vetrices;
+%             else
+%                 struct_vetrices = vertcat(struct_vetrices,slice_vetrices);
+%             end
+%             zCoords(k) = zCoord;
+%             if k>1 && zCoord == zCoords(k-1)
+%                 struct_mask(:,:,i) = struct_mask(:,:,i)+slice_mask;
+%             else
+%                 i = i+1;
+%                 struct_mask(:,:,i) = slice_mask;
+%             end
         end
     end
-    clear slice_mask slice_vetrices
-    % interpolate structure mask to cube
-    struct_zVec = unique(struct_vetrices(:,3));
-    [x, y, z] = ndgrid(xVec,yVec,struct_zVec); % existing data
-    [xi, yi, zi] = ndgrid(xVec,yVec,zVec); % including new slice
-    imdist = @(x) -bwdist(bwperim(x)).*~x + bwdist(bwperim(x)).*x;
-    struct_mask = +struct_mask;
-    for m = 1:size(struct_mask,3)
-        struct_mask_dist(:,:,m) = imdist(struct_mask(:,:,m));
+    if strcmpi(slice.ContourGeometricType, 'POINT') % skip reference point
+       continue; 
     end
-    struct_mask_i = interpn(x,y,z,struct_mask_dist,xi,yi,zi);
-    clear x y z struct_mask_dist xi yi zi struct_mask
-    struct_mask_i = struct_mask_i(:,:,:)>=0;
-
-    structures.(struct_name).indicator_mask = struct_mask_i;
-    structures.(struct_name).structure_vetrices = struct_vetrices;
-    clear struct_mask_i struct_vetrices;
+    
+    struct_zVec = sort(unique(cell2mat(temp_struct_mask(:,1))),'descend');
+    for ii=1:length(struct_zVec) %for each slice
+        slice_masks = temp_struct_mask(cell2mat(temp_struct_mask(:,1)) == struct_zVec(ii),2);
+        slice_vetrices = temp_struct_mask(cell2mat(temp_struct_mask(:,1)) == struct_zVec(ii),3);
+        for jj=1:size(slice_masks,1) % there may multiple struct definintions on one slice
+            if jj == 1
+                struct_mask(:,:,ii) = cell2mat(slice_masks(jj,1));
+                struct_vetrices = cell2mat(slice_vetrices(jj,1));
+            else
+                struct_mask(:,:,ii) = struct_mask(:,:,ii)+cell2mat(slice_masks(jj,1));
+                struct_vetrices = vertcat(struct_vetrices, cell2mat(slice_vetrices(jj,1)));
+            end
+        end
+    end
+%     if ~(isequal(zCoords, sort(zCoords,'descend')) || isequal(zCoords, sort(zCoords,'ascend'))) %safe check
+%         disp('slices definitions non monotonic!'); % Fix it!
+%         pause;
+%         continue;
+%     end
+    if exist('struct_vetrices', 'var')
+        % interpolate structure mask to cube
+        %struct_zVec = unique(struct_vetrices(:,3));
+        if length(struct_zVec) > 1
+            [x, y, z] = ndgrid(xVec,yVec,struct_zVec); % existing data
+            [xi, yi, zi] = ndgrid(xVec,yVec,zVec); % including new slice
+            imdist = @(x) -bwdist(bwperim(x)).*~x + bwdist(bwperim(x)).*x;
+            struct_mask = +struct_mask;
+            struct_mask_dist = zeros(0);
+            for m = 1:size(struct_mask,3)
+                struct_mask_dist(:,:,m) = imdist(struct_mask(:,:,m));
+            end
+            struct_mask_i = interpn(x,y,z,struct_mask_dist,xi,yi,zi);
+            clear x y z struct_mask_dist xi yi zi struct_mask
+            struct_mask_i = struct_mask_i>=0;
+            
+            structures.(struct_name).indicator_mask = struct_mask_i;
+            structures.(struct_name).structure_vetrices = struct_vetrices;
+            clear struct_mask_i struct_vetrices;
+        else
+            disp('Single slice structure skipped!'); % Fix it!
+        end
+    end
 end
 
 function struc_name = getStructName(dicom_info, roinumber)
@@ -79,9 +125,6 @@ end
 struc_name = upper(struc_name);
 
 function [slice_mask, slice_vetrices, zCoord] = calcSliceMask(slice, xVec, yVec)
-if strcmpi(slice.ContourGeometricType, 'POINT')
-    return;
-end
 zCoord = slice.ContourData(3);
 xCoord = zeros(slice.NumberOfContourPoints,1); % prealocation
 yCoord = zeros(slice.NumberOfContourPoints,1); % prealocation
@@ -99,3 +142,4 @@ yCoord = [yCoord; yCoord(1)]; % close the contour
 slice_vetrices = [xCoord, yCoord, ones(length(xCoord),1)*zCoord];
 [X, Y] = meshgrid(yVec, xVec);
 slice_mask = inpolygon(X, Y, xCoord, yCoord);
+
