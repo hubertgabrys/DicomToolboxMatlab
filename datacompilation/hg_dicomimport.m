@@ -1,6 +1,6 @@
 function tps_data = hg_dicomimport( varargin )
-%UNTITLED2 Summary of this function goes here
-%   Detailed explanation goes here
+
+save_matfile = true;
 
 if length(varargin) == 3
     ct_paths = varargin{1};
@@ -46,9 +46,12 @@ tps_data.dose.yVec = yVec_new;
 tps_data.dose.zVec = zVec_new;
 
 %% Save cubes as 'tps_data.mat'
-[FileName,PathName] = uiputfile('*','Save as...', 'tps_data.mat');
-if ischar(FileName)
-    save([PathName, FileName],'tps_data');
+if save_matfile
+    [pathstr,~,~] = fileparts(rtss_path);
+    [FileName,PathName] = uiputfile(fullfile(pathstr, 'tps_data.mat'),'Save as...');
+    if ischar(FileName)
+        save([PathName, FileName],'tps_data', '-v7.3');
+    end
+    disp('All structures calculated and saved to tps_data.mat');
 end
-disp('All structures calculated and saved to tps_data.mat');
 end

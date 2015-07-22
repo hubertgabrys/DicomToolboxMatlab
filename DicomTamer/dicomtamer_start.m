@@ -56,7 +56,7 @@ function dicomtamer_start_OpeningFcn(hObject, eventdata, handles, varargin)
 handles.output = hObject;
 maximumNrOfStructures = 50;
 handles.selected_structures = zeros(maximumNrOfStructures,1);
-handles.defaultdatapath = 'C:\Users\gabrysh\Desktop\DICOMs\PatientData_kopfklinik\HN_compiledDICOMS\OK2\HN001\';
+handles.defaultdatapath = 'C:\Users\gabrysh\Desktop\DICOMs\PatientData_kopfklinik\HN_compiledDICOMS\OK\';
 handles.slice = -1;
 
 % Update handles structure
@@ -172,7 +172,7 @@ drawnow;
 handles.slice = handles.slice + 1;
 % Update handles structure
 guidata(hObject, handles)
-handles.slice = plotDose( hObject, eventdata, handles);
+handles.slice = plotDoseAndCT( hObject, eventdata, handles);
 % Update handles structure
 guidata(hObject, handles)
 
@@ -194,7 +194,7 @@ drawnow;
 handles.slice = handles.slice - 1;
 % Update handles structure
 guidata(hObject, handles)
-handles.slice = plotDose( hObject, eventdata, handles );
+handles.slice = plotDoseAndCT( hObject, eventdata, handles );
 % Update handles structure
 guidata(hObject, handles)
 
@@ -240,7 +240,7 @@ drawnow;
 % Update handles structure
 guidata(hObject, handles)
 axes(handles.axes1);
-handles.slice = plotDose( hObject, eventdata, handles );
+handles.slice = plotDoseAndCT( hObject, eventdata, handles );
 guidata(hObject, handles)
 
 % set back an arrow
@@ -260,7 +260,6 @@ drawnow;
 
 [filename, directory] = uigetfile([handles.defaultdatapath '*.mat'], 'Choose tps_data.mat file...');
 load([directory '\' filename]);
-tps_data = tps_data;
 handles.output_directory = directory;
 handles.s_fieldnames = fieldnames(tps_data.structures);
 setPatName(handles);
@@ -268,6 +267,7 @@ handles.tps_data = tps_data;
 set(handles.Plot_button, 'Enable', 'on');
 guidata(hObject, handles);
 enablecheckboxes(hObject, eventdata, handles)
+Plot_button_Callback(hObject, eventdata, handles);
 
 % set back an arrow
 set(handles.figure1, 'pointer', oldpointer)
@@ -1012,7 +1012,7 @@ switch contents
         set(handles.analysisresult_text,'ForegroundColor', [0 0.5 0]);
 end
 
-function slice = plotDose(hObject, eventdata, handles)
+function slice = plotDoseAndCT(hObject, eventdata, handles)
 struct_sel = lookForEnabledCheckboxes2(hObject, eventdata, handles);
 if sum(struct_sel) == 0
     colors = [0 0 0];

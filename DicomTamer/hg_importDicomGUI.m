@@ -22,7 +22,7 @@ function varargout = hg_importDicomGUI(varargin)
 
 % Edit the above text to modify the response to help hg_importDicomGUI
 
-% Last Modified by GUIDE v2.5 18-Jun-2015 14:39:18
+% Last Modified by GUIDE v2.5 22-Jul-2015 17:42:31
 
 
 % Begin initialization code - DO NOT EDIT
@@ -256,27 +256,26 @@ function import_button_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+% show the hourglass during computation
+oldpointer = get(handles.figure1, 'pointer');
+set(handles.figure1, 'pointer', 'watch')
+drawnow;
+
 patient_listbox = get(handles.patient_listbox,'String');
 ctseries_listbox = get(handles.ctseries_listbox,'String');
-rtseries_listbox = get(handles.rtseries_listbox,'String');
-rtdoseseries_listbox = get(handles.rtdoseseries_listbox,'String');
+%rtseries_listbox = get(handles.rtseries_listbox,'String');
+%rtdoseseries_listbox = get(handles.rtdoseseries_listbox,'String');
 selected_patient = patient_listbox(get(handles.patient_listbox,'Value'));
 selected_ctseries = ctseries_listbox(get(handles.ctseries_listbox,'Value'));
-selected_rtseries = rtseries_listbox(get(handles.rtseries_listbox,'Value'));
-selected_rtdoseseries = rtdoseseries_listbox(get(handles.rtdoseseries_listbox,'Value'));
+%selected_rtseries = rtseries_listbox(get(handles.rtseries_listbox,'Value'));
+%selected_rtdoseseries = rtdoseseries_listbox(get(handles.rtdoseseries_listbox,'Value'));
 
 if get(handles.SeriesUID_radiobutton,'Value') == 1
     files.ct = handles.fileList(strcmp(handles.fileList(:,3), selected_patient) & ...
         strcmp(handles.fileList(:,4), selected_ctseries),:);
-    
-    %files.rtss = handles.fileList(strcmp(handles.fileList(:,3), selected_patient) & ...
-    %    strcmp(handles.fileList(:,4), selected_rtseries),:);
 else
     files.ct = handles.fileList(strcmp(handles.fileList(:,3), selected_patient) & ...
         strcmp(handles.fileList(:,5), selected_ctseries),:);
-    
-    %files.rtss = handles.fileList(strcmp(handles.fileList(:,3), selected_patient) & ...
-    %    strcmp(handles.fileList(:,5), selected_rtseries),:);
 end
 
 allRtss = handles.fileList(strcmp(handles.fileList(:,3), selected_patient) & strcmp(handles.fileList(:,2),'RTSTRUCT'),:);
@@ -285,20 +284,13 @@ files.rtss = allRtss(get(handles.rtseries_listbox,'Value'),:);
 allRtdose = handles.fileList(strcmp(handles.fileList(:,3), selected_patient) & strcmp(handles.fileList(:,2),'RTDOSE'),:);
 files.rtdose = allRtdose(get(handles.rtdoseseries_listbox,'Value'),:);
 
-% files.resx = str2double(get(handles.resx_edit,'String'));
-% files.resy = str2double(get(handles.resy_edit,'String'));
-% % check if valid assignment is made when z slices are not equi-distant
-% if strcmp(get(handles.resz_edit,'String'),'not equi')
-%     msgbox('Ct data not sliced equi-distantly in z direction! Chose uniform resolution.', 'Error','error');
-%     return;
-% else
-%     files.resz = str2double(get(handles.resz_edit,'String'));
-% end
+resolution = str2double(get(handles.edit10, 'String'));
+hg_dicomimport(files.ct(:,1),files.rtss{1},files.rtdose{1},resolution);
 
-%tps_data = hg_dicomimport(files.rtdose{1},files.rtss{1},files.ct,get(handles.dir_path_field,'String'));
-default_resolution = 2.5;
-tps_data = hg_dicomimport(files.ct(:,1),files.rtss{1},files.rtdose{1},default_resolution);
+% set back an arrow
+set(handles.figure1, 'pointer', oldpointer)
 
+close(handles.figure1);
 
 
 % --- Executes on button press in cancel_button.
@@ -576,6 +568,29 @@ function rtdose_resz_edit_Callback(hObject, eventdata, handles)
 % --- Executes during object creation, after setting all properties.
 function rtdose_resz_edit_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to rtdose_resz_edit (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function edit10_Callback(hObject, eventdata, handles)
+% hObject    handle to edit10 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit10 as text
+%        str2double(get(hObject,'String')) returns contents of edit10 as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit10_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit10 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
