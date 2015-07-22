@@ -10,7 +10,8 @@ function structures = hg_calcStructMasks(rtss_path, xVec, yVec, zVec)
 %
 
 % structures to skip
-struct2skip = {'AUSSENKONTUR', 'SKIN'};
+%struct2skip = {'AUSSENKONTUR', 'SKIN'};
+struct2skip = {''};
 
 % calculate structures' masks
 dicom_info = dicominfo(rtss_path);
