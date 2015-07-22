@@ -264,10 +264,9 @@ handles.output_directory = directory;
 handles.s_fieldnames = fieldnames(tps_data.structures);
 setPatName(handles);
 handles.tps_data = tps_data;
-set(handles.Plot_button, 'Enable', 'on');
 guidata(hObject, handles);
 enablecheckboxes(hObject, eventdata, handles)
-Plot_button_Callback(hObject, eventdata, handles);
+handles.slice = plotDoseAndCT( hObject, eventdata, handles );
 
 % set back an arrow
 set(handles.figure1, 'pointer', oldpointer)
