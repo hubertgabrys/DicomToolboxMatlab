@@ -266,26 +266,33 @@ ctseries_listbox = get(handles.ctseries_listbox,'String');
 %rtseries_listbox = get(handles.rtseries_listbox,'String');
 %rtdoseseries_listbox = get(handles.rtdoseseries_listbox,'String');
 selected_patient = patient_listbox(get(handles.patient_listbox,'Value'));
-selected_ctseries = ctseries_listbox(get(handles.ctseries_listbox,'Value'));
-%selected_rtseries = rtseries_listbox(get(handles.rtseries_listbox,'Value'));
-%selected_rtdoseseries = rtdoseseries_listbox(get(handles.rtdoseseries_listbox,'Value'));
-
-if get(handles.SeriesUID_radiobutton,'Value') == 1
-    files.ct = handles.fileList(strcmp(handles.fileList(:,3), selected_patient) & ...
-        strcmp(handles.fileList(:,4), selected_ctseries),:);
+if isempty(ctseries_listbox)
+    dicompaths.ct = cell(0,1);
 else
-    files.ct = handles.fileList(strcmp(handles.fileList(:,3), selected_patient) & ...
-        strcmp(handles.fileList(:,5), selected_ctseries),:);
+    selected_ctseries = ctseries_listbox(get(handles.ctseries_listbox,'Value'));
+    %selected_rtseries = rtseries_listbox(get(handles.rtseries_listbox,'Value'));
+    %selected_rtdoseseries = rtdoseseries_listbox(get(handles.rtdoseseries_listbox,'Value'));
+    
+    if get(handles.SeriesUID_radiobutton,'Value') == 1
+        dicompaths.ct = handles.fileList(strcmp(handles.fileList(:,3), selected_patient) & ...
+            strcmp(handles.fileList(:,4), selected_ctseries),:);
+    else
+        dicompaths.ct = handles.fileList(strcmp(handles.fileList(:,3), selected_patient) & ...
+            strcmp(handles.fileList(:,5), selected_ctseries),:);
+    end
 end
 
 allRtss = handles.fileList(strcmp(handles.fileList(:,3), selected_patient) & strcmp(handles.fileList(:,2),'RTSTRUCT'),:);
-files.rtss = allRtss(get(handles.rtseries_listbox,'Value'),:);
+dicompaths.rtss = allRtss(get(handles.rtseries_listbox,'Value'),:);
 
 allRtdose = handles.fileList(strcmp(handles.fileList(:,3), selected_patient) & strcmp(handles.fileList(:,2),'RTDOSE'),:);
-files.rtdose = allRtdose(get(handles.rtdoseseries_listbox,'Value'),:);
+dicompaths.rtdose = allRtdose(get(handles.rtdoseseries_listbox,'Value'),:);
 
-resolution = str2double(get(handles.edit10, 'String'));
-hg_dicomimport(files.ct(:,1),files.rtss{1},files.rtdose{1},resolution);
+dicompaths.resolution = str2double(get(handles.edit10, 'String'));
+dicompaths.save_matfile = true;
+dicompaths.autosave = false;
+
+hg_dicomimport(dicompaths);
 
 % set back an arrow
 set(handles.figure1, 'pointer', oldpointer)
@@ -439,46 +446,46 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
     set(hObject,'BackgroundColor','white');
 end
 
-% 
+%
 % % --- Executes on selection change in ctseries_listbox.
 % function ctseries_listbox_Callback(hObject, eventdata, handles)
 % % hObject    handle to ctseries_listbox (see GCBO)
 % % eventdata  reserved - to be defined in a future version of MATLAB
 % % handles    structure with handles and user data (see GUIDATA)
-% 
+%
 % % Hints: contents = cellstr(get(hObject,'String')) returns ctseries_listbox contents as cell array
 % %        contents{get(hObject,'Value')} returns selected item from ctseries_listbox
-% 
-% 
+%
+%
 % % --- Executes during object creation, after setting all properties.
 % function ctseries_listbox_CreateFcn(hObject, eventdata, handles)
 % % hObject    handle to ctseries_listbox (see GCBO)
 % % eventdata  reserved - to be defined in a future version of MATLAB
 % % handles    empty - handles not created until after all CreateFcns called
-% 
+%
 % % Hint: listbox controls usually have a white background on Windows.
 % %       See ISPC and COMPUTER.
 % if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
 %     set(hObject,'BackgroundColor','white');
 % end
-% 
-% 
+%
+%
 % % --- Executes on selection change in rtseries_listbox.
 % function rtseries_listbox_Callback(hObject, eventdata, handles)
 % % hObject    handle to rtseries_listbox (see GCBO)
 % % eventdata  reserved - to be defined in a future version of MATLAB
 % % handles    structure with handles and user data (see GUIDATA)
-% 
+%
 % % Hints: contents = cellstr(get(hObject,'String')) returns rtseries_listbox contents as cell array
 % %        contents{get(hObject,'Value')} returns selected item from rtseries_listbox
-% 
-% 
+%
+%
 % % --- Executes during object creation, after setting all properties.
 % function rtseries_listbox_CreateFcn(hObject, eventdata, handles)
 % % hObject    handle to rtseries_listbox (see GCBO)
 % % eventdata  reserved - to be defined in a future version of MATLAB
 % % handles    empty - handles not created until after all CreateFcns called
-% 
+%
 % % Hint: listbox controls usually have a white background on Windows.
 % %       See ISPC and COMPUTER.
 % if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))

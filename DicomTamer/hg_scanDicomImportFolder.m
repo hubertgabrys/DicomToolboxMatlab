@@ -14,11 +14,11 @@ if ~isempty(fileList)
     
     %% check for dicom files and differentiate patients, types, and series
     numOfFiles = numel(fileList(:,1));
-    h = waitbar(0,'Please wait...');
+    %h = waitbar(0,'Please wait...');
     %h.WindowStyle = 'Modal';
-    steps = numOfFiles;
+    %steps = numOfFiles;
     for i = numOfFiles:-1:1
-        waitbar((numOfFiles+1-i) / steps)
+        %waitbar((numOfFiles+1-i) / steps)
         try 
             info = dicominfo(fileList{i});
         catch
@@ -88,7 +88,7 @@ if ~isempty(fileList)
             fileList{i,11} = NaN;
         end     
     end
-    close(h)
+    %close(h)
     
     if ~isempty(fileList)
         patientList = unique(fileList(:,3));

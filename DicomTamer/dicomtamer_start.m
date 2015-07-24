@@ -22,7 +22,7 @@ function varargout = dicomtamer_start(varargin)
 
 % Edit the above text to modify the response to help dicomtamer_start
 
-% Last Modified by GUIDE v2.5 18-Jun-2015 14:34:22
+% Last Modified by GUIDE v2.5 24-Jul-2015 18:14:48
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -56,7 +56,8 @@ function dicomtamer_start_OpeningFcn(hObject, eventdata, handles, varargin)
 handles.output = hObject;
 maximumNrOfStructures = 50;
 handles.selected_structures = zeros(maximumNrOfStructures,1);
-handles.defaultdatapath = 'C:\Users\gabrysh\Desktop\DICOMs\PatientData_kopfklinik\HN_compiledDICOMS\OK\';
+handles.defaultdatapath = ...
+    'C:\Users\gabrysh\Desktop\DICOMs\PatientData_kopfklinik\HN_compiledDICOMS\OK\';
 handles.slice = -1;
 
 % Update handles structure
@@ -109,7 +110,8 @@ function LoadDose_button_Callback(hObject, eventdata, handles)
 % hObject    handle to LoadDose_button (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-[filename, directory] = uigetfile([handles.defaultdatapath '*.dcm'], 'Choose RTDose Plan...');
+[filename, directory] = ...
+    uigetfile([handles.defaultdatapath '*.dcm'], 'Choose RTDose Plan...');
 handles.rtdose_plan_path = [directory filename];
 % Update handles structure
 guidata(hObject, handles)
@@ -214,7 +216,8 @@ set(handles.figure1, 'pointer', 'watch')
 drawnow;
 
 % calculate
-tps_data = hg_dicomimport(handles.rtdose_plan_path, handles.rtstruc_path, handles.ct_dir, handles.output_directory);
+tps_data = hg_dicomimport(handles.rtdose_plan_path, handles.rtstruc_path, ...
+    handles.ct_dir, handles.output_directory);
 set(handles.analysisresult_text,'String', 'TPS data loaded!');
 set(hObject, 'Enable', 'off');
 set(handles.Plot_button, 'Enable', 'on');
@@ -258,7 +261,8 @@ oldpointer = get(handles.figure1, 'pointer');
 set(handles.figure1, 'pointer', 'watch')
 drawnow;
 
-[filename, directory] = uigetfile([handles.defaultdatapath '*.mat'], 'Choose tps_data.mat file...');
+[filename, directory] = uigetfile([handles.defaultdatapath '*.mat'],...
+    'Choose tps_data.mat file...');
 load([directory '\' filename]);
 handles.output_directory = directory;
 handles.s_fieldnames = fieldnames(tps_data.structures);
@@ -1201,4 +1205,17 @@ function newloader_button_Callback(hObject, eventdata, handles)
 % hObject    handle to newloader_button (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-hg_importDicomGUI
+if get(handles.checkbox76, 'Value') == 0
+    hg_importDicomGUI
+else
+    hg_importDicomBatchGUI
+end
+
+
+% --- Executes on button press in checkbox76.
+function checkbox76_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox76 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox76
