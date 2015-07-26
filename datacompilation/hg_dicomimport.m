@@ -2,13 +2,12 @@ function tps_data = hg_dicomimport( dicompaths )
 
 ct_paths = dicompaths.ct(:,1);
 rtss_path = dicompaths.rtss{1};
-rtdose_path = dicompaths.rtdose{1};
+rtdose_path = dicompaths.rtdose;
 resolution = dicompaths.resolution;
 save_matfile = dicompaths.save_matfile;
 autosave = dicompaths.autosave;
 
 ct_exists = ~isempty(dicompaths.ct);
-rtdose_exists = length(dicompaths.rtdose) == 1;
 
 %% interpolate CTs
 if ct_exists
@@ -27,7 +26,7 @@ if ct_exists
 end
 
 %% interpolate RTDOSE
-if rtdose_exists
+if size(rtdose_path,1) == 1
     [cube_d, xVec_d, yVec_d, zVec_d] = hg_loadDoseCube(rtdose_path);
     if ~ct_exists
         xVec_new = (xVec_d(1):resolution:xVec_d(end))';
@@ -39,6 +38,34 @@ if rtdose_exists
     cube_d_new = interpn(x,y,z,cube_d,xi,yi,zi);
     clear x y z xi yi zi;
     tps_data.dose.cube = cube_d_new;
+    tps_data.dose.xVec = xVec_new;
+    tps_data.dose.yVec = yVec_new;
+    tps_data.dose.zVec = zVec_new;
+elseif size(rtdose_path,1) == 2 && ct_exists
+    error('not implemented yet!');
+elseif size(rtdose_path,1) == 2 && ~ct_exists
+    [cube1_d, xVec1_d, yVec1_d, zVec1_d] = hg_loadDoseCube(rtdose_path{1});
+    [cube2_d, xVec2_d, yVec2_d, zVec2_d] = hg_loadDoseCube(rtdose_path{2});
+    % find the one with the larger spread in z direction
+    if (length(zVec1_d) > length(zVec2_d)) && (length(xVec1_d) == length(xVec2_d)) && (length(yVec1_d) == length(yVec2_d))
+        xVec_new = (xVec1_d(1):resolution:xVec1_d(end))';
+        yVec_new = (yVec1_d(1):resolution:yVec1_d(end))';
+        zVec_new = (zVec1_d(1):-resolution:zVec1_d(end))';
+    elseif (length(xVec1_d) == length(xVec2_d)) && (length(yVec1_d) == length(yVec2_d))
+        xVec_new = (xVec2_d(1):resolution:xVec2_d(end))';
+        yVec_new = (yVec2_d(1):resolution:yVec2_d(end))';
+        zVec_new = (zVec2_d(1):-resolution:zVec2_d(end))';
+    end
+    [x, y, z] = ndgrid(xVec1_d,yVec1_d,zVec1_d);
+    [xi, yi, zi] = ndgrid(xVec_new,yVec_new,zVec_new);
+    cube1_d_new = interpn(x,y,z,cube1_d,xi,yi,zi);
+    cube1_d_new(isnan(cube1_d_new)) = 0;
+    clear x y z;
+    [x, y, z] = ndgrid(xVec2_d,yVec2_d,zVec2_d);
+    cube2_d_new = interpn(x,y,z,cube2_d,xi,yi,zi);
+    cube2_d_new(isnan(cube2_d_new)) = 0;
+    clear x y z xi yi zi;
+    tps_data.dose.cube = cube1_d_new+cube2_d_new;
     tps_data.dose.xVec = xVec_new;
     tps_data.dose.yVec = yVec_new;
     tps_data.dose.zVec = zVec_new;

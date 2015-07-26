@@ -22,7 +22,7 @@ function varargout = hg_importDicomGUI(varargin)
 
 % Edit the above text to modify the response to help hg_importDicomGUI
 
-% Last Modified by GUIDE v2.5 22-Jul-2015 17:42:31
+% Last Modified by GUIDE v2.5 26-Jul-2015 02:29:32
 
 
 % Begin initialization code - DO NOT EDIT
@@ -90,12 +90,18 @@ if patDir ~= 0
 end
 
 function scan(hObject, eventdata, handles)
+% show the hourglass during computation
+oldpointer = get(handles.figure1, 'pointer');
+set(handles.figure1, 'pointer', 'watch')
+drawnow;
 [fileList, patient_listbox] = hg_scanDicomImportFolder(get(handles.dir_path_field,'String'));
 if iscell(patient_listbox)
     handles.fileList =  fileList;
     set(handles.patient_listbox,'String',patient_listbox);
     guidata(hObject, handles);
 end
+% set back an arrow
+set(handles.figure1, 'pointer', oldpointer)
 
 % --- Executes on selection change in patient_listbox.
 function patient_listbox_Callback(hObject, eventdata, handles)
@@ -193,12 +199,6 @@ end
 
 % --- Executes during object creation, after setting all properties.
 function patient_listbox_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to patient_listbox (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: listbox controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
@@ -206,22 +206,10 @@ end
 
 % --- Executes on selection change in ctseries_listbox.
 function ctseries_listbox_Callback(hObject, eventdata, handles)
-% hObject    handle to ctseries_listbox (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: contents = cellstr(get(hObject,'String')) returns ctseries_listbox contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from ctseries_listbox
 
 
 % --- Executes during object creation, after setting all properties.
 function ctseries_listbox_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to ctseries_listbox (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: listbox controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
@@ -286,7 +274,11 @@ allRtss = handles.fileList(strcmp(handles.fileList(:,3), selected_patient) & str
 dicompaths.rtss = allRtss(get(handles.rtseries_listbox,'Value'),:);
 
 allRtdose = handles.fileList(strcmp(handles.fileList(:,3), selected_patient) & strcmp(handles.fileList(:,2),'RTDOSE'),:);
-dicompaths.rtdose = allRtdose(get(handles.rtdoseseries_listbox,'Value'),:);
+if get(handles.registerRTDOSE_button,'Value')
+    dicompaths.rtdose = allRtdose(:,1);
+else
+    dicompaths.rtdose = allRtdose(get(handles.rtdoseseries_listbox,'Value'),1);
+end
 
 dicompaths.resolution = str2double(get(handles.edit10, 'String'));
 dicompaths.save_matfile = true;
@@ -606,3 +598,8 @@ function edit10_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+
+% --- Executes on button press in registerRTDOSE_button.
+function registerRTDOSE_button_Callback(hObject, eventdata, handles)
+

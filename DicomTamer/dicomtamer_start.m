@@ -263,14 +263,16 @@ drawnow;
 
 [filename, directory] = uigetfile([handles.defaultdatapath '*.mat'],...
     'Choose tps_data.mat file...');
-load([directory '\' filename]);
-handles.output_directory = directory;
-handles.s_fieldnames = fieldnames(tps_data.structures);
-setPatName(handles);
-handles.tps_data = tps_data;
-guidata(hObject, handles);
-enablecheckboxes(hObject, eventdata, handles)
-handles.slice = plotDoseAndCT( hObject, eventdata, handles );
+if ischar(filename) && ischar(directory)
+    load([directory '\' filename]);
+    handles.output_directory = directory;
+    handles.s_fieldnames = fieldnames(tps_data.structures);
+    setPatName(handles);
+    handles.tps_data = tps_data;
+    guidata(hObject, handles);
+    enablecheckboxes(hObject, eventdata, handles)
+    handles.slice = plotDoseAndCT( hObject, eventdata, handles );
+end
 
 % set back an arrow
 set(handles.figure1, 'pointer', oldpointer)
@@ -1027,10 +1029,15 @@ end
 % else
 %     shift = 0;
 % end
-hg_plotct(handles.tps_data, handles.s_fieldnames(struct_sel == 1), handles.slice, colors, handles.axes1);
-slice = hg_plotdose(handles.tps_data, handles.s_fieldnames(struct_sel == 1), handles.slice, colors, handles.axes2);
-%handles.slice = slice;
-%guidata(hObject, handles)
+if isfield(handles.tps_data, 'ct')
+    slice = hg_plotct(handles.tps_data, handles.s_fieldnames(struct_sel == 1), handles.slice, colors, handles.axes1);
+    handles.slice = slice;
+end
+if isfield(handles.tps_data, 'dose')
+    slice = hg_plotdose(handles.tps_data, handles.s_fieldnames(struct_sel == 1), handles.slice, colors, handles.axes2);
+    handles.slice = slice;
+end
+guidata(hObject, handles)
 
 
 
