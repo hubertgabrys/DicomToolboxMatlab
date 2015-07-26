@@ -27,7 +27,7 @@ end
 
 %% interpolate RTDOSE
 if size(rtdose_path,1) == 1
-    [cube_d, xVec_d, yVec_d, zVec_d] = hg_loadDoseCube(rtdose_path);
+    [cube_d, xVec_d, yVec_d, zVec_d] = hg_loadDoseCube(rtdose_path{1});
     if ~ct_exists
         xVec_new = (xVec_d(1):resolution:xVec_d(end))';
         yVec_new = (yVec_d(1):resolution:yVec_d(end))';

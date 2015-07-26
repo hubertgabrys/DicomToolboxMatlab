@@ -136,7 +136,7 @@ for i=1:length(subdirList)
     dicompaths.ct = fileList(strcmp(fileList(:,2),'CT'),1);
     dicompaths.rtss = fileList(strcmp(fileList(:,2),'RTSTRUCT'),1);
     dicompaths.rtdose = fileList(strcmp(fileList(:,2),'RTDOSE'),1);
-    if length(patientList)~=1 || length(dicompaths.rtss)~=1 || length(dicompaths.rtdose)>1
+    if length(patientList)~=1 || length(dicompaths.rtss)~=1 || length(dicompaths.rtdose)>2  
         msgbox(['Check DICOMs: ', subdirList{i}], 'Error','error');   
     end
     dicompaths.resolution = str2double(get(handles.edit2, 'String'));
