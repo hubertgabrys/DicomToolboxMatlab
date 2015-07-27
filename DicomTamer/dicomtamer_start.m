@@ -162,9 +162,6 @@ function checkbox2_Callback(hObject, eventdata, handles)
 
 % --- Executes on button press in Up_button.
 function Up_button_Callback(hObject, eventdata, handles)
-% hObject    handle to Up_button (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
 
 % show the hourglass during computation
 oldpointer = get(handles.figure1, 'pointer');
@@ -184,9 +181,6 @@ set(handles.figure1, 'pointer', oldpointer)
 
 % --- Executes on button press in Down_button.
 function Down_button_Callback(hObject, eventdata, handles)
-% hObject    handle to Down_button (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
 
 % show the hourglass during computation
 oldpointer = get(handles.figure1, 'pointer');
@@ -206,9 +200,6 @@ set(handles.figure1, 'pointer', oldpointer)
 
 % --- Executes on button press in calculate_button.
 function calculate_button_Callback(hObject, eventdata, handles)
-% hObject    handle to calculate_button (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
 
 % show the hourglass during computation
 oldpointer = get(handles.figure1, 'pointer');
@@ -231,9 +222,6 @@ set(handles.figure1, 'pointer', oldpointer)
 
 % --- Executes on button press in Plot_button.
 function Plot_button_Callback(hObject, eventdata, handles)
-% hObject    handle to Plot_button (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
 
 % show the hourglass during computation
 oldpointer = get(handles.figure1, 'pointer');
@@ -252,9 +240,6 @@ set(handles.figure1, 'pointer', oldpointer)
 
 % --- Executes on button press in LoadTPSdata_button.
 function LoadTPSdata_button_Callback(hObject, eventdata, handles)
-% hObject    handle to LoadTPSdata_button (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
 
 % show the hourglass during computation
 oldpointer = get(handles.figure1, 'pointer');
@@ -1184,13 +1169,39 @@ guidata(hObject, handles)
 
 % --- Executes on button press in calcFeatures.
 function calcFeatures_Callback(hObject, eventdata, handles)
-% hObject    handle to calcFeatures (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-descriptors = calculateFeatures(handles.tps_data);
-writetable(descriptors, [handles.output_directory 'descriptors.dat'], 'Delimiter','\t');
-%writetable(descriptors, [handles.output_directory 'descriptors.xlsx']); %
-%runns much slower than exporting to csv
+if get(handles.checkbox76, 'Value') == 0
+    features = calculateFeatures(handles.tps_data);
+    writetable(features, fullfile(handles.output_directory, 'features.dat'));
+else
+    input_dir = uigetdir(handles.defaultdatapath, 'Choose Input Directory...');
+    mainDirInfo = dir(input_dir); % get information about main directory
+    dirIndex = [mainDirInfo.isdir]; % get index of subfolders
+    subdirList = {mainDirInfo(dirIndex).name}'; % list of filenames in main directory
+    subdirList = subdirList(3:end);
+    
+    h = waitbar(0,'Please wait...');
+    steps = length(subdirList);
+    for i=1:length(subdirList)
+        load(fullfile(input_dir,subdirList{i},'tps_data'));
+        features = calculateFeatures(tps_data);
+        ids = {};
+        for j=1:size(features,1)
+            ids{j,1} = subdirList{i};
+        end
+        ids_table = table(ids, 'VariableNames', {'ID'});
+        if exist('features_all', 'var')
+            features_all = [features_all; [ids_table, features]];
+        else
+            features_all = [ids_table, features];
+        end
+        
+        waitbar(i / steps)
+    end
+    writetable(features_all, fullfile(input_dir, 'features_all.dat'))
+    
+    close(h)
+end
+
 
 
 % --- Executes on button press in select_all_button.

@@ -7,7 +7,8 @@ resolution = dicompaths.resolution;
 save_matfile = dicompaths.save_matfile;
 autosave = dicompaths.autosave;
 
-ct_exists = ~isempty(dicompaths.ct);
+%ct_exists = ~isempty(dicompaths.ct);
+ct_exists = false;
 
 %% interpolate CTs
 if ct_exists
@@ -36,6 +37,7 @@ if size(rtdose_path,1) == 1
     [x, y, z] = ndgrid(xVec_d,yVec_d,zVec_d);
     [xi, yi, zi] = ndgrid(xVec_new,yVec_new,zVec_new);
     cube_d_new = interpn(x,y,z,cube_d,xi,yi,zi);
+    cube_d_new(isnan(cube_d_new)) = 0;
     clear x y z xi yi zi;
     tps_data.dose.cube = cube_d_new;
     tps_data.dose.xVec = xVec_new;

@@ -9,9 +9,9 @@ strucnames = fieldnames(tps_data.structures);
 
 for i=1:length(strucnames)
     strucname = strucnames{i};
-        
+    disp(strucname);    
     %% DOSIMETRIC
-    struct_cube = hg_loadcube(tps_data, strucname, 'dose', false );
+    struct_cube = hg_loadcube(tps_data, strucname, 'dose' );
     % this part requires revision. it will be better to have separate
     % functions for different dosimetric descripotors. The functions will
     % get binary 3-dimensional structures as input eg:
@@ -26,7 +26,7 @@ for i=1:length(strucnames)
     dvh = dvh.array;
     
     % spatial moments
-    struct_cube = hg_loadcube(tps_data, strucname, 'dose', true );
+    %struct_cube = hg_loadcube(tps_data, strucname, 'dose', true );
     %mom_def = [0 0 0; eye(3); 1 1 0; 1 0 1; 0 1 1; 1 1 1; 2*eye(3); 3*eye(3)];
     mom_def = npermutek(0:4,3);
     moments = hg_calcdosemoments(struct_cube, mom_def);
@@ -38,12 +38,11 @@ for i=1:length(strucnames)
         dosimetric_features = [dvh, moments];
     end
     
-    %% CT
-    struct_cube = hg_loadcube(tps_data, strucname, 'ct', false );
+    %struct_cube = hg_loadcube(tps_data, strucname, 'ct', false );
     struct_cube_mask = struct_cube>0;
-    xspacing = tps_data.ct.xVec(2)-tps_data.ct.xVec(1);
-    yspacing = tps_data.ct.yVec(2)-tps_data.ct.yVec(1);
-    zspacing = tps_data.ct.zVec(1)-tps_data.ct.zVec(2);
+    xspacing = tps_data.dose.xVec(2)-tps_data.dose.xVec(1);
+    yspacing = tps_data.dose.yVec(2)-tps_data.dose.yVec(1);
+    zspacing = tps_data.dose.zVec(1)-tps_data.dose.zVec(2);
 %     xspacing = 1;
 %     yspacing = 1;
 %     zspacing = 1;
@@ -77,11 +76,11 @@ for i=1:length(strucnames)
     
     % merge results
     variablenames = {'area', 'volume', 'eccentricity', 'compactness', 'density', 'sphericity'};
-    if exist('ct_features', 'var')
-        ct_features = [ct_features; table(struc_area, struc_volume, struc_eccentricity, struc_compactness, ...
+    if exist('shape_features', 'var')
+        shape_features = [shape_features; table(struc_area, struc_volume, struc_eccentricity, struc_compactness, ...
             struc_density, struc_sphericity, 'VariableNames', variablenames)];
     else
-        ct_features = table(struc_area, struc_volume, struc_eccentricity, struc_compactness,...
+        shape_features = table(struc_area, struc_volume, struc_eccentricity, struc_compactness,...
             struc_density, struc_sphericity, 'VariableNames', variablenames);
     end
     
@@ -91,6 +90,6 @@ end
 
 %% output
 strucnames = table(strucnames, 'VariableNames', {'structure'});
-output = [strucnames, dosimetric_features, ct_features];
+output = [strucnames, dosimetric_features, shape_features];
 
 end
