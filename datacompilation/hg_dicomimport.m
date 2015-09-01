@@ -71,6 +71,28 @@ elseif size(rtdose_path,1) == 2 && ~ct_exists
     tps_data.dose.xVec = xVec_new;
     tps_data.dose.yVec = yVec_new;
     tps_data.dose.zVec = zVec_new;
+elseif size(rtdose_path,1) > 2
+    for i=1:length(rtdose_path)
+        [cube_d(:,:,i), xVec_d, yVec_d, zVec_d(i,1)] = hg_loadDoseCube(rtdose_path{i});
+    end
+    if zVec_d(2) - zVec_d(1) > 0 % Flip cube if zVec is ascending
+        zVec_d(:,1) = flip(zVec_d);
+        cube_d = flip(cube_d, 3);
+    end
+    if ~ct_exists
+        xVec_new = (xVec_d(1):resolution:xVec_d(end))';
+        yVec_new = (yVec_d(1):resolution:yVec_d(end))';
+        zVec_new = (zVec_d(1):-resolution:zVec_d(end))';
+    end
+    [x, y, z] = ndgrid(xVec_d,yVec_d,zVec_d);
+    [xi, yi, zi] = ndgrid(xVec_new,yVec_new,zVec_new);
+    cube_d_new = interpn(x,y,z,cube_d,xi,yi,zi);
+    cube_d_new(isnan(cube_d_new)) = 0;
+    clear x y z xi yi zi;
+    tps_data.dose.cube = cube_d_new;
+    tps_data.dose.xVec = xVec_new;
+    tps_data.dose.yVec = yVec_new;
+    tps_data.dose.zVec = zVec_new;
 end
 
 

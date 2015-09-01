@@ -151,7 +151,14 @@ if ~isempty(get(hObject,'String'))
         if ~isempty(selectedRTdoseSeriesString)
             rtdose_res_x = unique(handles.fileList(strcmp(handles.fileList(:,2), 'RTDOSE') & strcmp(handles.fileList(:,3), selected_patient) & strcmp(handles.fileList(:,4), selectedRTdoseSeriesString{get(handles.rtdoseseries_listbox,'Value')}),9));
             rtdose_res_y = unique(handles.fileList(strcmp(handles.fileList(:,2), 'RTDOSE') & strcmp(handles.fileList(:,3), selected_patient) & strcmp(handles.fileList(:,4), selectedRTdoseSeriesString{get(handles.rtdoseseries_listbox,'Value')}),10));
-            rtdose_res_z = unique(handles.fileList(strcmp(handles.fileList(:,2), 'RTDOSE') & strcmp(handles.fileList(:,3), selected_patient) & strcmp(handles.fileList(:,4), selectedRTdoseSeriesString{get(handles.rtdoseseries_listbox,'Value')}),11));
+            try
+                rtdose_res_z = unique(handles.fileList(strcmp(handles.fileList(:,2), 'RTDOSE') & strcmp(handles.fileList(:,3), selected_patient) & strcmp(handles.fileList(:,4), selectedRTdoseSeriesString{get(handles.rtdoseseries_listbox,'Value')}),11));
+            catch ME
+                rtdose_res_z = handles.fileList(strcmp(handles.fileList(:,2), 'RTDOSE') & strcmp(handles.fileList(:,3), selected_patient) & strcmp(handles.fileList(:,4), selectedRTdoseSeriesString{get(handles.rtdoseseries_listbox,'Value')}),11);
+                if isnan(rtdose_res_z{1})
+                    set(handles.registerRTDOSE_button, 'Value',1);
+                end
+            end
         else
             rtdose_res_x = NaN; rtdose_res_y = NaN; rtdose_res_z = NaN;
         end

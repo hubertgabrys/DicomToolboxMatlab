@@ -97,7 +97,7 @@ for j = 1:length(list_of_contoured_strucs)
                     noofnonzeroslices = noofnonzeroslices+1;
                 end
             end
-            if noofnonzeroslices < 2
+            if noofnonzeroslices < 2 % number of nonzero slices
                 disp('Single slice structure skipped!'); % Fix it!
                 continue;
             end
