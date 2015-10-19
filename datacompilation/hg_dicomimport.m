@@ -111,6 +111,6 @@ if save_matfile
             save([PathName, FileName],'tps_data', '-v7.3');
         end
     end
-    disp('All structures calculated and saved to tps_data.mat');
+    fprintf('All structures calculated and saved to tps_data.mat\n\n');
 end
 end

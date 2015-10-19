@@ -1170,8 +1170,14 @@ guidata(hObject, handles)
 % --- Executes on button press in calcFeatures.
 function calcFeatures_Callback(hObject, eventdata, handles)
 if get(handles.checkbox76, 'Value') == 0
+    % show the hourglass during computation
+    oldpointer = get(handles.figure1, 'pointer');
+    set(handles.figure1, 'pointer', 'watch')
+    drawnow;
     features = calculateFeatures(handles.tps_data);
-    writetable(features, fullfile(handles.output_directory, 'features.dat'));
+    writetable(features, fullfile(handles.output_directory, 'features.xls'));
+    set(handles.figure1, 'pointer', oldpointer);
+    drawnow;
 else
     input_dir = uigetdir(handles.defaultdatapath, 'Choose Input Directory...');
     mainDirInfo = dir(input_dir); % get information about main directory
@@ -1197,7 +1203,7 @@ else
         
         waitbar(i / steps)
     end
-    writetable(features_all, fullfile(input_dir, 'features_all.dat'))
+    writetable(features_all, fullfile(input_dir, 'features_all.xls'))
     
     close(h)
 end

@@ -7,6 +7,7 @@ function output = calculateFeatures( tps_data )
 
 strucnames = fieldnames(tps_data.structures);
 
+fprintf('Calculating features...\n');
 for i=1:length(strucnames)
     strucname = strucnames{i};
     disp(strucname);    
@@ -85,8 +86,9 @@ for i=1:length(strucnames)
     end
     
     
-    fprintf('Features for %s calculated!\n', strucname);
+    %fprintf('Features for %s calculated.\n', strucname);
 end
+fprintf('All features calculated!\n\n');
 
 %% output
 strucnames = table(strucnames, 'VariableNames', {'structure'});
