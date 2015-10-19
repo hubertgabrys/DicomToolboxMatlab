@@ -78,16 +78,17 @@ elseif size(rtdose_path,1) > 2
             [cube_d(:,:,i), xVec_d, yVec_d, zVec_d(i,1)] = hg_loadDoseCube(rtdose_path{i});
         end
     elseif dimensions == 3
-        for i=1:length(rtdose_path)
-            try
-            [cube_d(:,:,:,i), xVec_d, yVec_d, zVec_d] = hg_loadDoseCube(rtdose_path{i});
-            catch
-                fprintf('Check dimensionmismatch!\n');
-                continue;
-            end
-            %[cube_d{i,1}, xVec_d, yVec_d, zVec_d] = hg_loadDoseCube(rtdose_path{i});
-        end
-        cube_d = sum(cube_d,4);
+%         for i=1:length(rtdose_path)
+%             try
+%             [cube_d(:,:,:,i), xVec_d, yVec_d, zVec_d] = hg_loadDoseCube(rtdose_path{i});
+%             catch
+%                 fprintf('Check dimensionmismatch!\n');
+%                 continue;
+%             end
+%             %[cube_d{i,1}, xVec_d, yVec_d, zVec_d] = hg_loadDoseCube(rtdose_path{i});
+%         end
+%         cube_d = sum(cube_d,4);
+        error('More than 2 RTDOSE dicoms not supported!');
     end
     if zVec_d(2) - zVec_d(1) > 0 % Flip cube if zVec is ascending
         zVec_d(:,1) = flip(zVec_d);

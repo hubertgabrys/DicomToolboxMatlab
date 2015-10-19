@@ -80,7 +80,13 @@ if ~isempty(fileList)
         end
         try
             if strcmp(info.Modality,'CT') || strcmp(info.Modality,'RTDOSE')
-                fileList{i,11} = num2str(info.SliceThickness);
+                slicethickness = info.SliceThickness;
+                if slicethickness ~= 0
+                    fileList{i,11} = num2str(slicethickness);
+                else
+                    slicethickness = abs(info.GridFrameOffsetVector(1)-info.GridFrameOffsetVector(end))/(length(info.GridFrameOffsetVector)-1);
+                    fileList{i,11} = num2str(slicethickness);
+                end
             else
                 fileList{i,11} = NaN;
             end
