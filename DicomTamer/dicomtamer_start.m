@@ -22,7 +22,7 @@ function varargout = dicomtamer_start(varargin)
 
 % Edit the above text to modify the response to help dicomtamer_start
 
-% Last Modified by GUIDE v2.5 24-Jul-2015 18:14:48
+% Last Modified by GUIDE v2.5 27-Oct-2015 16:08:28
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -76,70 +76,6 @@ function varargout = dicomtamer_start_OutputFcn(hObject, eventdata, handles)
 
 % Get default command line output from handles structure
 varargout{1} = handles.output;
-
-
-% --- Executes on button press in analysis_radio1.
-function analysis_radio1_Callback(hObject, eventdata, handles)
-% hObject    handle to analysis_radio1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of analysis_radio1
-
-
-% --- Executes on button press in analysis_radio2.
-function analysis_radio2_Callback(hObject, eventdata, handles)
-% hObject    handle to analysis_radio2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of analysis_radio2
-
-
-% --- Executes on button press in analysis_radio3.
-function analysis_radio3_Callback(hObject, eventdata, handles)
-% hObject    handle to analysis_radio3 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of analysis_radio3
-
-
-% --- Executes on button press in LoadDose_button.
-function LoadDose_button_Callback(hObject, eventdata, handles)
-% hObject    handle to LoadDose_button (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-[filename, directory] = ...
-    uigetfile([handles.defaultdatapath '*.dcm'], 'Choose RTDose Plan...');
-handles.rtdose_plan_path = [directory filename];
-% Update handles structure
-guidata(hObject, handles)
-
-
-% --- Executes on button press in OutputDirectory_button.
-function OutputDirectory_button_Callback(hObject, eventdata, handles)
-% hObject    handle to OutputDirectory_button (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-output_directory = uigetdir(handles.defaultdatapath, 'Choose Output Directory...');
-handles.output_directory = [output_directory '\'];
-setPatName(handles);
-guidata(hObject, handles)
-set(handles.calculate_button, 'Enable', 'on');
-% Update handles structure
-guidata(hObject, handles)
-
-
-% --- Executes on button press in LoadStructures_button.
-function LoadStructures_button_Callback(hObject, eventdata, handles)
-% hObject    handle to LoadStructures_button (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-[filename, directory] = uigetfile([handles.defaultdatapath '*.dcm'], 'Choose RTStruc...');
-handles.rtstruc_path = [directory filename];
-% Update handles structure
-guidata(hObject, handles)
 
 
 % --- Executes on button press in checkbox1.
@@ -198,28 +134,6 @@ guidata(hObject, handles)
 set(handles.figure1, 'pointer', oldpointer)
 
 
-% --- Executes on button press in calculate_button.
-function calculate_button_Callback(hObject, eventdata, handles)
-
-% show the hourglass during computation
-oldpointer = get(handles.figure1, 'pointer');
-set(handles.figure1, 'pointer', 'watch')
-drawnow;
-
-% calculate
-tps_data = hg_dicomimport(handles.rtdose_plan_path, handles.rtstruc_path, ...
-    handles.ct_dir, handles.output_directory);
-set(handles.analysisresult_text,'String', 'TPS data loaded!');
-set(hObject, 'Enable', 'off');
-set(handles.Plot_button, 'Enable', 'on');
-handles.s_fieldnames = fieldnames(tps_data.structures);
-handles.tps_data = tps_data;
-guidata(hObject, handles)
-enablecheckboxes(hObject, eventdata, handles)
-
-% set back an arrow
-set(handles.figure1, 'pointer', oldpointer)
-
 % --- Executes on button press in Plot_button.
 function Plot_button_Callback(hObject, eventdata, handles)
 
@@ -265,13 +179,6 @@ set(handles.figure1, 'pointer', oldpointer)
 function setPatName(handles)
 [~, deepestFolder] = fileparts(handles.output_directory(1:end-1));
 set(handles.patname_text, 'String', deepestFolder);
-
-
-% --- Executes on button press in LoadBoost_button.
-function LoadBoost_button_Callback(hObject, eventdata, handles)
-% hObject    handle to LoadBoost_button (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
 
 
 % --- Executes on button press in structure1_checkbox.
@@ -1130,82 +1037,65 @@ delete(OrigDlgH);
 dicomtamer_start();
 
 
-% --- Executes on button press in loadrtstruc2_button.
-function loadrtstruc2_button_Callback(hObject, eventdata, handles)
-% hObject    handle to loadrtstruc2_button (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-temp{1} = handles.rtstruc_path;
-[filename, directory] = uigetfile([handles.defaultdatapath '*.dcm'], 'Choose RTStruc...');
-temp{2} = [directory filename];
-handles.rtstruc_path = temp;
-% Update handles structure
-guidata(hObject, handles)
-
-
-% --- Executes on button press in loadrtdose2.
-function loadrtdose2_Callback(hObject, eventdata, handles)
-% hObject    handle to loadrtdose2 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-temp{1} = handles.rtdose_plan_path;
-[filename, directory] = uigetfile([handles.defaultdatapath '*.dcm'], 'Choose RTDose Plan...');
-temp{2} = [directory filename];
-%temp{2} = loadRTDosePlan();
-handles.rtdose_plan_path = temp;
-% Update handles structure
-guidata(hObject, handles)
-
-
-% --- Executes on button press in LoadCT.
-function LoadCT_Callback(hObject, eventdata, handles)
-% hObject    handle to LoadCT (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-ct_dir = uigetdir(handles.defaultdatapath, 'Choose Output Directory...');
-handles.ct_dir = [ct_dir '\'];
-guidata(hObject, handles)
-
-
 % --- Executes on button press in calcFeatures.
 function calcFeatures_Callback(hObject, eventdata, handles)
-if get(handles.checkbox76, 'Value') == 0
+if get(handles.batch_tick, 'Value') == 0
     % show the hourglass during computation
     oldpointer = get(handles.figure1, 'pointer');
     set(handles.figure1, 'pointer', 'watch')
     drawnow;
-    features = calculateFeatures(handles.tps_data);
-    writetable(features, fullfile(handles.output_directory, 'features.xls'));
+    
+    if exist('handles.tps_data', 'var')
+        features = calculateFeatures(handles.tps_data);
+        writetable(features, fullfile(handles.output_directory, 'features.xls'));
+    else
+        errordlg('Load tps.mat file first!','tps.mat error');
+    end
+    
     set(handles.figure1, 'pointer', oldpointer);
     drawnow;
 else
+    h = warndlg('DicomTamer will load features from xls files if found in patients'' directories. If you want to calculate all features from scratch, delete the xls files first!');
+    uiwait(h);
     input_dir = uigetdir(handles.defaultdatapath, 'Choose Input Directory...');
-    mainDirInfo = dir(input_dir); % get information about main directory
-    dirIndex = [mainDirInfo.isdir]; % get index of subfolders
-    subdirList = {mainDirInfo(dirIndex).name}'; % list of filenames in main directory
-    subdirList = subdirList(3:end);
-    
-    h = waitbar(0,'Please wait...');
-    steps = length(subdirList);
-    for i=1:length(subdirList)
-        load(fullfile(input_dir,subdirList{i},'tps_data'));
-        features = calculateFeatures(tps_data);
-        ids = {};
-        for j=1:size(features,1)
-            ids{j,1} = subdirList{i};
-        end
-        ids_table = table(ids, 'VariableNames', {'ID'});
-        if exist('features_all', 'var')
-            features_all = [features_all; [ids_table, features]];
-        else
-            features_all = [ids_table, features];
-        end
+    if ischar(input_dir) % in case the user choose cancel
+        mainDirInfo = dir(input_dir); % get information about main directory
+        dirIndex = [mainDirInfo.isdir]; % get index of subfolders
+        subdirList = {mainDirInfo(dirIndex).name}'; % list of filenames in main directory
+        subdirList = subdirList(3:end);
         
-        waitbar(i / steps)
+        h = waitbar(0,'Please wait...');
+        steps = length(subdirList);
+        for i=1:length(subdirList)
+            fprintf('%s\n', subdirList{i});
+            
+            if exist(fullfile(input_dir, subdirList{i}, 'features.xls'), 'file')
+                %load xls file
+                features = readtable(fullfile(input_dir, subdirList{i}, 'features.xls'));
+                fprintf('Features loaded from xls file!\n');
+            else
+                load(fullfile(input_dir, subdirList{i},'tps_data'));
+                features = calculateFeatures(tps_data);
+                writetable(features, fullfile(input_dir, subdirList{i}, 'features.xls'));
+            end
+            
+            ids = {};
+            for j=1:size(features,1)
+                ids{j,1} = subdirList{i};
+            end
+            ids_table = table(ids, 'VariableNames', {'ID'});
+            if exist('features_all', 'var')
+                features_all = [features_all; [ids_table, features]];
+            else
+                features_all = [ids_table, features];
+            end
+            
+            waitbar(i / steps)
+        end
+        writetable(features_all, fullfile(input_dir, 'features_all.xls'))
+        
+        close(h)
     end
-    writetable(features_all, fullfile(input_dir, 'features_all.xls'))
-    
-    close(h)
 end
 
 
@@ -1229,17 +1119,17 @@ function newloader_button_Callback(hObject, eventdata, handles)
 % hObject    handle to newloader_button (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-if get(handles.checkbox76, 'Value') == 0
+if get(handles.batch_tick, 'Value') == 0
     hg_importDicomGUI
 else
     hg_importDicomBatchGUI
 end
 
 
-% --- Executes on button press in checkbox76.
-function checkbox76_Callback(hObject, eventdata, handles)
-% hObject    handle to checkbox76 (see GCBO)
+% --- Executes on button press in batch_tick.
+function batch_tick_Callback(hObject, eventdata, handles)
+% hObject    handle to batch_tick (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hint: get(hObject,'Value') returns toggle state of checkbox76
+% Hint: get(hObject,'Value') returns toggle state of batch_tick

@@ -88,7 +88,7 @@ for i=1:length(strucnames)
     
     %fprintf('Features for %s calculated.\n', strucname);
 end
-fprintf('All features calculated!\n\n');
+fprintf('Features for all structures calculated!\n\n');
 
 %% output
 strucnames = table(strucnames, 'VariableNames', {'structure'});
