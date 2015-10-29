@@ -22,7 +22,7 @@ for j = 1:length(list_of_contoured_strucs)
     if nnz(ismember(struct2skip, struct_name)) % don't calculate structures defined in struct2skip
         continue;
     end
-    disp(struct_name)
+    %disp(struct_name)
     list_of_slices = fieldnames(dicom_info.ROIContourSequence.(list_of_contoured_strucs{j}).ContourSequence);
     %i = 0;
     %zCoords = zeros(length(list_of_slices),1);

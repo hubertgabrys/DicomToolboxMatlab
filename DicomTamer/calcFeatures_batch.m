@@ -2,11 +2,7 @@ function features_all = calcFeatures_batch( input_dir, recalcFeatures, showGUI )
 
 if ischar(input_dir) % in case the user choose cancel
     fprintf('Calculating features...');
-    dirinfo = dir(input_dir);
-    dirinfo = dirinfo(3:end);
-    dirinfo = struct2table(dirinfo);
-    dirinfo = dirinfo(dirinfo.isdir,:);
-    dirnames = dirinfo.name;
+    dirnames = getSubDirList( input_dir );
     
     if showGUI
         h = waitbar(0,'Please wait...');

@@ -1,11 +1,22 @@
-function tps_data = hg_dicomimport( dicompaths )
+function tps_data = hg_dicomimport( input_path, resolution, save_matfile, default_save_path, showGUI)
+
+[fileList,patientList ] = hg_scanDicomImportFolder(input_path);
+dicompaths.ct = fileList(strcmp(fileList(:,2),'CT'),1);
+dicompaths.rtss = fileList(strcmp(fileList(:,2),'RTSTRUCT'),1);
+dicompaths.rtdose = fileList(strcmp(fileList(:,2),'RTDOSE'),1);
+if length(patientList)~=1 || length(dicompaths.rtss)~=1 || length(dicompaths.rtdose)>2
+    if showGUI
+        msgbox(['Check DICOMs: ', input_path], 'Error','error');
+        error(['Check DICOMs: ', input_path]);
+    end
+end
 
 ct_paths = dicompaths.ct(:,1);
 rtss_path = dicompaths.rtss{1};
 rtdose_path = dicompaths.rtdose;
-resolution = dicompaths.resolution;
-save_matfile = dicompaths.save_matfile;
-autosave = dicompaths.autosave;
+%resolution = dicompaths.resolution;
+%save_matfile = dicompaths.save_matfile;
+%default_save_path = dicompaths.default_save_path;
 
 %ct_exists = ~isempty(dicompaths.ct);
 ct_exists = false;
@@ -78,16 +89,16 @@ elseif size(rtdose_path,1) > 2
             [cube_d(:,:,i), xVec_d, yVec_d, zVec_d(i,1)] = hg_loadDoseCube(rtdose_path{i});
         end
     elseif dimensions == 3
-%         for i=1:length(rtdose_path)
-%             try
-%             [cube_d(:,:,:,i), xVec_d, yVec_d, zVec_d] = hg_loadDoseCube(rtdose_path{i});
-%             catch
-%                 fprintf('Check dimensionmismatch!\n');
-%                 continue;
-%             end
-%             %[cube_d{i,1}, xVec_d, yVec_d, zVec_d] = hg_loadDoseCube(rtdose_path{i});
-%         end
-%         cube_d = sum(cube_d,4);
+        %         for i=1:length(rtdose_path)
+        %             try
+        %             [cube_d(:,:,:,i), xVec_d, yVec_d, zVec_d] = hg_loadDoseCube(rtdose_path{i});
+        %             catch
+        %                 fprintf('Check dimensionmismatch!\n');
+        %                 continue;
+        %             end
+        %             %[cube_d{i,1}, xVec_d, yVec_d, zVec_d] = hg_loadDoseCube(rtdose_path{i});
+        %         end
+        %         cube_d = sum(cube_d,4);
         error('More than 2 RTDOSE dicoms not supported!');
     end
     if zVec_d(2) - zVec_d(1) > 0 % Flip cube if zVec is ascending
@@ -118,7 +129,7 @@ tps_data.structures = hg_calcStructMasks(rtss_path, xVec_new, yVec_new, zVec_new
 %% Save cubes as 'tps_data.mat'
 if save_matfile
     [pathstr,~,~] = fileparts(rtss_path);
-    if autosave
+    if default_save_path
         save(fullfile(pathstr, 'tps_data.mat'),'tps_data', '-v7.3');
     else
         [FileName,PathName] = uiputfile(fullfile(pathstr, 'tps_data.mat'),'Save as...');
@@ -126,6 +137,6 @@ if save_matfile
             save([PathName, FileName],'tps_data', '-v7.3');
         end
     end
-    fprintf('All structures calculated and saved to tps_data.mat\n\n');
+    %fprintf('All structures calculated and saved to tps_data.mat\n\n');
 end
 end

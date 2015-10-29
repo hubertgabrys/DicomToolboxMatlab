@@ -124,34 +124,12 @@ set(handles.figure1, 'pointer', 'watch')
 drawnow;
 
 input_dir = get(handles.dir_path_field, 'String');
-mainDirInfo = dir(input_dir); % get information about main directory
-dirIndex = [mainDirInfo.isdir]; % get index of subfolders
-subdirList = {mainDirInfo(dirIndex).name}'; % list of filenames in main directory
-subdirList = subdirList(3:end);
-
-h = waitbar(0,'Please wait...');
-steps = length(subdirList);
-for i=1:length(subdirList)
-    fprintf('%s\n', subdirList{i});
-    if handles.checkbox1.Value && exist(fullfile(input_dir, subdirList{i}, 'tps_data.mat'), 'file')
-       % don't recalculate .mat file!
-    else
-        [fileList,patientList ] = hg_scanDicomImportFolder(fullfile(input_dir,subdirList{i}));
-        dicompaths.ct = fileList(strcmp(fileList(:,2),'CT'),1);
-        dicompaths.rtss = fileList(strcmp(fileList(:,2),'RTSTRUCT'),1);
-        dicompaths.rtdose = fileList(strcmp(fileList(:,2),'RTDOSE'),1);
-        if length(patientList)~=1 || length(dicompaths.rtss)~=1 || length(dicompaths.rtdose)>2
-            msgbox(['Check DICOMs: ', subdirList{i}], 'Error','error');
-        end
-        dicompaths.resolution = str2double(get(handles.edit2, 'String'));
-        dicompaths.save_matfile = true;
-        dicompaths.autosave = true;
-        
-        hg_dicomimport(dicompaths);
-    end
-    waitbar(i / steps)
-end
-close(h)
+skipifmatfileexists = handles.checkbox1.Value;
+resolution = str2double(get(handles.edit2, 'String'));
+save_matfile = true;
+default_save_path = true;
+showGUI = true;
+dicomimport_batch(input_dir, skipifmatfileexists, resolution, save_matfile, default_save_path, showGUI);
 
 % set back an arrow
 set(handles.figure1, 'pointer', oldpointer)
