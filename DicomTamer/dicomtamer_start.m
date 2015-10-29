@@ -1058,44 +1058,9 @@ else
     h = warndlg('DicomTamer will load features from xls files if found in patients'' directories. If you want to calculate all features from scratch, delete the xls files first!');
     uiwait(h);
     input_dir = uigetdir(handles.defaultdatapath, 'Choose Input Directory...');
-    if ischar(input_dir) % in case the user choose cancel
-        mainDirInfo = dir(input_dir); % get information about main directory
-        dirIndex = [mainDirInfo.isdir]; % get index of subfolders
-        subdirList = {mainDirInfo(dirIndex).name}'; % list of filenames in main directory
-        subdirList = subdirList(3:end);
-        
-        h = waitbar(0,'Please wait...');
-        steps = length(subdirList);
-        for i=1:length(subdirList)
-            fprintf('%s\n', subdirList{i});
-            
-            if exist(fullfile(input_dir, subdirList{i}, 'features.xls'), 'file')
-                %load xls file
-                features = readtable(fullfile(input_dir, subdirList{i}, 'features.xls'));
-                fprintf('Features loaded from xls file!\n');
-            else
-                load(fullfile(input_dir, subdirList{i},'tps_data'));
-                features = calculateFeatures(tps_data);
-                writetable(features, fullfile(input_dir, subdirList{i}, 'features.xls'));
-            end
-            
-            ids = {};
-            for j=1:size(features,1)
-                ids{j,1} = subdirList{i};
-            end
-            ids_table = table(ids, 'VariableNames', {'ID'});
-            if exist('features_all', 'var')
-                features_all = [features_all; [ids_table, features]];
-            else
-                features_all = [ids_table, features];
-            end
-            
-            waitbar(i / steps)
-        end
-        writetable(features_all, fullfile(input_dir, 'features_all.xls'))
-        
-        close(h)
-    end
+    showGUI = true;
+    recalcFeatures = false;
+    calcFeatures_batch( input_dir, recalcFeatures, showGUI);
 end
 
 
