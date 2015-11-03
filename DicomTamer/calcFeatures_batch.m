@@ -1,7 +1,7 @@
 function features_all = calcFeatures_batch( input_dir, recalcFeatures, showGUI )
 
 if ischar(input_dir) % in case the user choose cancel
-    fprintf('Calculating features...');
+    fprintf('Calculating features for all VOIs...');
     dirnames = getSubDirList( input_dir );
     
     if showGUI
@@ -14,15 +14,15 @@ if ischar(input_dir) % in case the user choose cancel
             waitbar(i / steps)
         end
         %fprintf('%s\n', dirnames{i});
-        
-        if ~recalcFeatures && exist(fullfile(input_dir, dirnames{i}, 'features.xls'), 'file')
-            %load xls file
-            features = readtable(fullfile(input_dir, dirnames{i}, 'features.xls'));
-            %fprintf('Features loaded from xls file!\n');
+        path = fullfile(input_dir, dirnames{i}, 'features.csv');
+        if ~recalcFeatures && exist(path, 'file')
+            %load csv file
+            features = readtable(path, 'Delimiter', ';');
+            %fprintf('Features loaded from csv file!\n');
         else
             load(fullfile(input_dir, dirnames{i},'tps_data'));
             features = calculateFeatures(tps_data);
-            writetable(features, fullfile(input_dir, dirnames{i}, 'features.xls'));
+            writetable(features, path, 'Delimiter', ';');
         end
         
         ids = {};
@@ -36,10 +36,11 @@ if ischar(input_dir) % in case the user choose cancel
             features_all = [ids_table, features];
         end
     end
-    if exist(fullfile(input_dir, 'features_all.xls'), 'file')
-        delete(fullfile(input_dir, 'features_all.xls'));
+    path = fullfile(input_dir, 'features_all.csv');
+    if exist(path, 'file')
+        delete(path);
     end
-    writetable(features_all, fullfile(input_dir, 'features_all.xls'))
+    writetable(features_all, path, 'Delimiter', ';');
     if showGUI
         close(h)
     end
@@ -47,4 +48,3 @@ end
 
 fprintf('DONE\n');
 end
-
