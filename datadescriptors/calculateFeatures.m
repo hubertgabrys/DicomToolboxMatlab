@@ -7,10 +7,10 @@ function output = calculateFeatures( tps_data )
 
 strucnames = fieldnames(tps_data.structures);
 
-fprintf('Calculating features...\n');
+%fprintf('Calculating features...\n');
 for i=1:length(strucnames)
     strucname = strucnames{i};
-    disp(strucname);    
+    %disp(strucname);    
     %% DOSIMETRIC
     struct_cube = hg_loadcube(tps_data, strucname, 'dose' );
     % this part requires revision. it will be better to have separate
@@ -88,7 +88,7 @@ for i=1:length(strucnames)
     
     %fprintf('Features for %s calculated.\n', strucname);
 end
-fprintf('Features for all structures calculated!\n\n');
+%fprintf('Features for all structures calculated!\n\n');
 
 %% output
 strucnames = table(strucnames, 'VariableNames', {'structure'});
