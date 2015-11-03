@@ -45,6 +45,6 @@ if ischar(input_dir) % in case the user choose cancel
         close(h)
     end
 end
-
+fprintf(repmat('\b',1,7));
 fprintf('DONE\n');
 end
