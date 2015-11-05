@@ -289,7 +289,7 @@ end
 
 dicompaths.resolution = str2double(get(handles.edit10, 'String'));
 dicompaths.save_matfile = true;
-dicompaths.autosave = false;
+dicompaths.default_save_path = false;
 
 hg_dicomimport(dicompaths);
 

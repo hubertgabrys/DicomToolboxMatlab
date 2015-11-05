@@ -1,22 +1,36 @@
-function tps_data = hg_dicomimport( input_path, resolution, save_matfile, default_save_path, showGUI)
+function tps_data = hg_dicomimport( varargin )
 
-[fileList,patientList ] = hg_scanDicomImportFolder(input_path);
-dicompaths.ct = fileList(strcmp(fileList(:,2),'CT'),1);
-dicompaths.rtss = fileList(strcmp(fileList(:,2),'RTSTRUCT'),1);
-dicompaths.rtdose = fileList(strcmp(fileList(:,2),'RTDOSE'),1);
-if length(patientList)~=1 || length(dicompaths.rtss)~=1 || length(dicompaths.rtdose)>2
-    if showGUI
-        msgbox(['Check DICOMs: ', input_path], 'Error','error');
-        error(['Check DICOMs: ', input_path]);
+if length(varargin) == 1
+    %old version
+    dicompaths = varargin{1};
+    ct_paths = dicompaths.ct(:,1);
+    rtss_path = dicompaths.rtss{1};
+    rtdose_path = dicompaths.rtdose;
+    resolution = dicompaths.resolution;
+    save_matfile = dicompaths.save_matfile;
+    default_save_path = dicompaths.default_save_path;
+elseif length(varargin) == 5
+    % new version
+    input_path = varargin{1};
+    resolution = varargin{2};
+    save_matfile = varargin{3};
+    default_save_path = varargin{4};
+    showGUI = varargin{5};
+    [fileList,patientList ] = hg_scanDicomImportFolder(input_path);
+    dicompaths.ct = fileList(strcmp(fileList(:,2),'CT'),1);
+    dicompaths.rtss = fileList(strcmp(fileList(:,2),'RTSTRUCT'),1);
+    dicompaths.rtdose = fileList(strcmp(fileList(:,2),'RTDOSE'),1);
+    if length(patientList)~=1 || length(dicompaths.rtss)~=1 || length(dicompaths.rtdose)>2
+        if showGUI
+            msgbox(['Check DICOMs: ', input_path], 'Error','error');
+            error(['Check DICOMs: ', input_path]);
+        end
     end
+    ct_paths = dicompaths.ct(:,1);
+    rtss_path = dicompaths.rtss{1};
+    rtdose_path = dicompaths.rtdose;
 end
 
-ct_paths = dicompaths.ct(:,1);
-rtss_path = dicompaths.rtss{1};
-rtdose_path = dicompaths.rtdose;
-%resolution = dicompaths.resolution;
-%save_matfile = dicompaths.save_matfile;
-%default_save_path = dicompaths.default_save_path;
 
 %ct_exists = ~isempty(dicompaths.ct);
 ct_exists = false;
