@@ -1045,7 +1045,7 @@ if get(handles.batch_tick, 'Value') == 0
     set(handles.figure1, 'pointer', 'watch')
     drawnow;
     
-    if exist('handles.tps_data', 'var')
+    if isfield(handles, 'tps_data')
         features = calculateFeatures(handles.tps_data);
         writetable(features, fullfile(handles.output_directory, 'features.xls'));
     else
