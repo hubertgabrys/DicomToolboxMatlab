@@ -26,6 +26,10 @@ for i=1:length(strucnames)
     dvh = hg_calcdvh(struct_cube);
     dvh = dvh.array;
     
+    % subvolumes
+    resolution = 3;
+    subvolumes = hg_calcStructSubvolumes2(struct_cube, resolution);
+    
     % spatial moments
     %struct_cube = hg_loadcube(tps_data, strucname, 'dose', true );
     %mom_def = [0 0 0; eye(3); 1 1 0; 1 0 1; 0 1 1; 1 1 1; 2*eye(3); 3*eye(3)];
@@ -34,9 +38,9 @@ for i=1:length(strucnames)
     
     % merge results
     if exist('dosimetric_features', 'var')
-        dosimetric_features = [dosimetric_features; [dvh, moments]];
+        dosimetric_features = [dosimetric_features; [dvh, subvolumes, moments]];
     else
-        dosimetric_features = [dvh, moments];
+        dosimetric_features = [dvh, subvolumes, moments];
     end
     
     %struct_cube = hg_loadcube(tps_data, strucname, 'ct', false );
