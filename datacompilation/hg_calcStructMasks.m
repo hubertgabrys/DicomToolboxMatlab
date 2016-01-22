@@ -19,10 +19,10 @@ list_of_contoured_strucs = fieldnames(dicom_info.ROIContourSequence);
 for j = 1:length(list_of_contoured_strucs)
     roinumber  = dicom_info.ROIContourSequence.(list_of_contoured_strucs{j}).ReferencedROINumber;
     struct_name = getStructName(dicom_info,roinumber);
-    if nnz(ismember(struct2skip, struct_name))
+    if nnz(ismember(struct2skip, struct_name)) % don't calculate structures defined in struct2skip
         continue;
     end
-    disp(struct_name)
+    %disp(struct_name)
     list_of_slices = fieldnames(dicom_info.ROIContourSequence.(list_of_contoured_strucs{j}).ContourSequence);
     %i = 0;
     %zCoords = zeros(length(list_of_slices),1);
@@ -90,6 +90,27 @@ for j = 1:length(list_of_contoured_strucs)
             struct_mask_i = interpn(x,y,z,struct_mask_dist,xi,yi,zi);
             clear x y z struct_mask_dist xi yi zi struct_mask
             struct_mask_i = struct_mask_i>=0;
+            
+            noofnonzeroslices = 0;
+            for m = 1:size(struct_mask_i,3)
+                if sum(sum(struct_mask_i(:,:,m))) > 0
+                    noofnonzeroslices = noofnonzeroslices+1;
+                end
+            end
+            if noofnonzeroslices < 2 % number of nonzero slices
+                disp('Single slice structure skipped!'); % Fix it!
+                continue;
+            end
+%             emptyplanes = false;
+%             for k=1:size(struct_mask_i,3)
+%                 if ~sum(sum(struct_mask_i(:,:,k)))
+%                     emptyplanes = true;
+%                 end
+%             end
+%             if emptyplanes
+%                 disp('Remove planes within the structure dosecube where strucutre contour is not defined!');
+%                 continue;
+%             end
             
             structures.(struct_name).indicator_mask = struct_mask_i;
             structures.(struct_name).structure_vetrices = struct_vetrices;

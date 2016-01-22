@@ -14,11 +14,11 @@ if ~isempty(fileList)
     
     %% check for dicom files and differentiate patients, types, and series
     numOfFiles = numel(fileList(:,1));
-    h = waitbar(0,'Please wait...');
+    %h = waitbar(0,'Please wait...');
     %h.WindowStyle = 'Modal';
-    steps = numOfFiles;
+    %steps = numOfFiles;
     for i = numOfFiles:-1:1
-        waitbar((numOfFiles+1-i) / steps)
+        %waitbar((numOfFiles+1-i) / steps)
         try 
             info = dicominfo(fileList{i});
         catch
@@ -80,7 +80,13 @@ if ~isempty(fileList)
         end
         try
             if strcmp(info.Modality,'CT') || strcmp(info.Modality,'RTDOSE')
-                fileList{i,11} = num2str(info.SliceThickness);
+                slicethickness = info.SliceThickness;
+                if slicethickness ~= 0
+                    fileList{i,11} = num2str(slicethickness);
+                else
+                    slicethickness = abs(info.GridFrameOffsetVector(1)-info.GridFrameOffsetVector(end))/(length(info.GridFrameOffsetVector)-1);
+                    fileList{i,11} = num2str(slicethickness);
+                end
             else
                 fileList{i,11} = NaN;
             end
@@ -88,7 +94,7 @@ if ~isempty(fileList)
             fileList{i,11} = NaN;
         end     
     end
-    close(h)
+    %close(h)
     
     if ~isempty(fileList)
         patientList = unique(fileList(:,3));

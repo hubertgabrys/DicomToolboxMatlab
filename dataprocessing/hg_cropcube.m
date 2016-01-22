@@ -6,8 +6,8 @@ function [V, x1gv, x2gv, x3gv] = hg_cropcube(V, x1gv, x2gv, x3gv, shift)
 % they start at zero go in positive direction.
 %
 %% Crop cube
-if isnan(V)
-    error('NaN values within cube!');
+if any(isnan(V(:)))
+    error('NaN values within the cube!');
 end
 x1gv_min = 0;
 x1gv_max = 0;

@@ -25,7 +25,7 @@ end
 axes(ax)
 showTitle = true;
 showLabels = false;
-showScale = false;
+showScale = true;
 structure_zCoordinate = zVec(slice);
 [X, Y] = meshgrid(yVec, xVec);
 Z = cube(:,:,slice);
