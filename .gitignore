@@ -43,5 +43,7 @@ Temporary Items
 .apdisk
 *.asv
 
-# do not check in dose calc base data generation
-doseCalcDataGeneration
+# misc
+debuging
+limbo
+temp
