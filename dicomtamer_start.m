@@ -56,9 +56,16 @@ function dicomtamer_start_OpeningFcn(hObject, eventdata, handles, varargin)
 handles.output = hObject;
 maximumNrOfStructures = 50;
 handles.selected_structures = zeros(maximumNrOfStructures,1);
-handles.defaultdatapath = ...
-    'C:\Users\gabrysh\Desktop\DICOMs\PatientData_kopfklinik\HN_compiledDICOMS\OK\';
+handles.defaultdatapath = fullfile('.');
 handles.slice = -1;
+
+% add to path
+addpath(fullfile('datacompilation'),...
+    fullfile('datadescriptors'),...
+    fullfile('dataprocessing'),...    
+    fullfile('datavisualization'),...    
+    fullfile('DicomTamer'),...
+    fullfile('misc'));
 
 % Update handles structure
 guidata(hObject, handles);
@@ -929,6 +936,20 @@ if isfield(handles.tps_data, 'dose')
     slice = hg_plotdose(handles.tps_data, handles.s_fieldnames(struct_sel == 1), handles.slice, colors, handles.axes2);
     handles.slice = slice;
 end
+if isfield(handles.tps_data, 'dose')
+        cla(handles.axes3) % clear axes before plotting
+        %drawnow
+        struct_sel = find(struct_sel == 1);
+        for j=1:length(struct_sel)
+            linecolor = get(eval(['handles.structure' ...
+                num2str(struct_sel(j)) '_checkbox']), 'ForegroundColor');
+            %title = handles.s_fieldnames{struct_sel(j)};
+            dvh = hg_calcdvh(handles.tps_data.dose.cube.*handles.tps_data.structures.(handles.s_fieldnames{struct_sel(j)}).indicator_mask);
+            hold( handles.axes3, 'on');
+            hg_plotdvh(dvh.args, dvh.vals, linecolor, '', handles.axes3);
+        end
+        hold( handles.axes3, 'off');
+end
 guidata(hObject, handles)
 
 
@@ -1047,7 +1068,7 @@ if get(handles.batch_tick, 'Value') == 0
     
     if isfield(handles, 'tps_data')
         features = calculateFeatures(handles.tps_data);
-        writetable(features, fullfile(handles.output_directory, 'features.xls'));
+        writetable(features, fullfile(handles.output_directory, 'features.csv'),'Delimiter',';');
     else
         errordlg('Load tps.mat file first!','tps.mat error');
     end

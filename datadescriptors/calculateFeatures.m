@@ -10,7 +10,7 @@ strucnames = fieldnames(tps_data.structures);
 %fprintf('Calculating features...\n');
 for i=1:length(strucnames)
     strucname = strucnames{i};
-    %disp(strucname);    
+    disp(strucname);    
     %% DOSIMETRIC
     struct_cube = hg_loadcube(tps_data, strucname, 'dose' );
     % this part requires revision. it will be better to have separate
@@ -27,8 +27,10 @@ for i=1:length(strucnames)
     dvh = dvh.array;
     
     % subvolumes
+    resolution = 2;
+    subvolumes1 = hg_calcStructSubvolumes(struct_cube, resolution);
     resolution = 3;
-    subvolumes = hg_calcStructSubvolumes2(struct_cube, resolution);
+    subvolumes2 = hg_calcStructSubvolumes(struct_cube, resolution);
     
     % spatial moments
     %struct_cube = hg_loadcube(tps_data, strucname, 'dose', true );
@@ -38,9 +40,9 @@ for i=1:length(strucnames)
     
     % merge results
     if exist('dosimetric_features', 'var')
-        dosimetric_features = [dosimetric_features; [dvh, subvolumes, moments]];
+        dosimetric_features = [dosimetric_features; [dvh, subvolumes1, subvolumes2, moments]];
     else
-        dosimetric_features = [dvh, subvolumes, moments];
+        dosimetric_features = [dvh, subvolumes1, subvolumes2, moments];
     end
     
     %struct_cube = hg_loadcube(tps_data, strucname, 'ct', false );
