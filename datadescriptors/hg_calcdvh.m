@@ -15,50 +15,70 @@ function output = hg_calcdvh(struct_cube)
 % dosecube is SA x TA x VA
 % http://www.pt.ntu.edu.tw/hmchai/PTglossary/kines.files/CardinalPlane.gif
 %
+% output
+% dx - minimal dose to the 'hottest' volume x
+% vx - volume reveiving at least dose x
+%
 % h.gabrys@dkfz.de, 2014-15
 %
 
 %% Initialization
-dvh_domain = 0:0.1:100;
-output.args = dvh_domain;
+dose_domain = (0:0.1:100)';
+output.args = dose_domain;
 
 %% Calculations for original cube
 % take only nonzero voxels
 struct_dc2 = struct_cube(struct_cube ~= 0);
-dv_min = min(struct_dc2(:));
-dv_max = max(struct_dc2(:));
-dv_mean = mean(struct_dc2(:));
+d_min = min(struct_dc2(:));
+d_max = max(struct_dc2(:));
+d_mean = mean(struct_dc2(:));
 % dv_median(j) = median(struct_dc2(:));
-dv_noVox = nnz(struct_dc2);
-dvh_vals = zeros(length(dvh_domain),1);
-for k=1:length(dvh_domain)
-    dvh_vals(k) = nnz(struct_dc2 >= dvh_domain(k))*100/nnz(struct_dc2);
-    if dvh_vals(k) > 100
+noVox = nnz(struct_dc2);
+volume_relative = zeros(length(dose_domain),1);
+for k=1:length(dose_domain)
+    volume_relative(k) = nnz(struct_dc2 >= dose_domain(k))*100/nnz(struct_dc2);
+    if volume_relative(k) > 100
         disp('what!?');
-        disp(dvh_vals(k));
+        disp(volume_relative(k));
     end
 end
-for k=100:-1:1
-    tmp = abs(dvh_vals-k);
-    if(k~=100)
-        [idx idx] = min(tmp);
-    else
-        foo = find(tmp);
-        idx = foo(1);
+% for vx=100:-1:1
+%     tmp = abs(volume_relative-vx);
+%     if(vx~=100)
+%         [idx idx] = min(tmp);
+%     else
+%         foo = find(tmp);
+%         idx = foo(1);
+%     end
+%     dx(1,vx) = dose_domain(idx);
+% end
+struct_dc2_vec = sort(struct_dc2(:));
+
+for x=1:99
+    idx = round(length(struct_dc2_vec)*(1-x/100));
+    if ~idx
+        idx=1;
     end
-    dvh(1,k) = dvh_domain(idx);
+    dx(x,1) = struct_dc2_vec(idx);
 end
-output.vals = dvh_vals;
+for x=1:70
+    vx(x,1) = nnz(struct_dc2_vec >= x)/nnz(struct_dc2_vec);
+end
+output.vals = volume_relative;
 clear tmp;
 
 %% prepare output
-for k=1:100
-    dvh_labels{k} = ['dvh', num2str(k)];
-end
 %t1 = array2table({strucname}, 'VariableNames', {'structure'});
-t2 = array2table([dv_noVox, dv_min, dv_max, dv_mean], 'VariableNames', {'no_voxels', 'min', 'max', 'mean'});
-t3 = array2table(dvh, 'VariableNames', dvh_labels);
-output.array = [t2, t3];
-output.variablenames = [{'no_voxels', 'min', 'max', 'mean'}, dvh_labels];
+t2 = array2table([noVox, d_min, d_max, d_mean], 'VariableNames', {'no_voxels', 'min', 'max', 'mean'});
+for k=1:99
+    d_labels{k} = ['d', num2str(k)];
+end
+t3 = array2table(dx', 'VariableNames', d_labels);
+for k=1:70
+    v_labels{k} = ['v', num2str(k)];
+end
+t4 = array2table(vx', 'VariableNames', v_labels);
+output.array = [t2, t3, t4];
+output.variablenames = [{'no_voxels', 'min', 'max', 'mean'}, d_labels, v_labels];
 %disp('DVHs calculated');
 end

@@ -8,7 +8,7 @@ if ~isempty(varargin)
     ylabel(ax, {'Relative Volume [%]'}, 'FontSize', 14);
     title(ax, str);
     axis(ax, [0 70 0 100]);
-    hold on;
+    %hold on;
 else
     plot(args, vals, 'LineWidth', 2, 'Color', linecolor, 'LineStyle', ':');
     xlabel({'Dose [Gy]'}, 'FontSize', 14);

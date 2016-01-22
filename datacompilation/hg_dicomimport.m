@@ -32,8 +32,8 @@ elseif length(varargin) == 5
 end
 
 
-%ct_exists = ~isempty(dicompaths.ct);
-ct_exists = false;
+ct_exists = ~isempty(dicompaths.ct);
+%ct_exists = false;
 
 %% interpolate CTs
 if ct_exists
