@@ -43,9 +43,11 @@ Temporary Items
 .apdisk
 *.asv
 
-
 # MISC
 debuging
 limbo
 temp
 datavisualization3D
+
+# Matlab
+*~
