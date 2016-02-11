@@ -2,7 +2,11 @@ function [cube, xVec, yVec, zVec] = hg_loadDoseCube(file_path)
 % The function takes a file path to RTDOSE dicom file and returns the dose
 % cube and cube grid vectors.
 %
-% Hubert Gabrys <h.gabrys@dkfz.de>, 2015
+% the cube is in LPS coordinate system (Right->Left, Anterior->Posterior,
+% Inferior->Superior)
+% http://www.itk.org/Wiki/images/thumb/f/f8/ImageOrientationStandard.png/800px-ImageOrientationStandard.png
+%
+% Hubert Gabrys <hubert.gabrys@gmail.com>, 2015-2016
 % This file is licensed under GPLv2
 %
 
@@ -20,7 +24,7 @@ if ndims(cube_o) == 4
     end
     zVec = dicom_info.ImagePositionPatient(3) + offset;
     
-    if zVec(2) - zVec(1) > 0 % Flip cube if zVec is ascending
+    if zVec(2) - zVec(1) < 0 % Flip cube if zVec is descending
         zVec(:,1) = flip(zVec);
         cube = flip(cube, 3);
     end
@@ -41,6 +45,8 @@ elseif dicom_info.ImageOrientationPatient(1) == -1 && dicom_info.ImageOrientatio
     xVec = dicom_info.ImagePositionPatient(2) - (0:double(dicom_info.Rows-1))' * dicom_info.PixelSpacing(2);
     xVec = sort(xVec);
     cube = flip(cube,1);
+else
+    error('Not supported patient''s orientation');
 end
 
 if dicom_info.ImageOrientationPatient(4) == 0 && dicom_info.ImageOrientationPatient(5) == 1 && dicom_info.ImageOrientationPatient(6) == 0
@@ -49,6 +55,8 @@ elseif dicom_info.ImageOrientationPatient(4) == 0 && dicom_info.ImageOrientation
     yVec = dicom_info.ImagePositionPatient(1) - (0:double(dicom_info.Columns-1))' * dicom_info.PixelSpacing(1);
     yVec = sort(yVec);
     cube = flip(cube,2);
+else
+    error('Not supported patient''s orientation');
 end
 
 

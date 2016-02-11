@@ -5,18 +5,18 @@ function structures = hg_calcStructMasks(rtss_path, xVec, yVec, zVec)
 % in Schenk et al., Efficient semiautomatic segmentation of 3D objects in
 % medical images.
 %
-% Hubert Gabrys <h.gabrys@dkfz.de>, 2015
+% Hubert Gabrys <h.gabrys@dkfz.de>, 2015-2016
 % This file is licensed under GPLv2
 %
 
 % structures to skip
-%struct2skip = {'AUSSENKONTUR', 'SKIN'};
-struct2skip = {''};
+struct2skip = {'AUSSENKONTUR', 'SKIN'};
+%struct2skip = {''};
 
 % calculate structures' masks
 dicom_info = dicominfo(rtss_path);
 list_of_contoured_strucs = fieldnames(dicom_info.ROIContourSequence);
-for j = 1:length(list_of_contoured_strucs)
+for j = 1:length(list_of_contoured_strucs) % for every contoured structure
     roinumber  = dicom_info.ROIContourSequence.(list_of_contoured_strucs{j}).ReferencedROINumber;
     struct_name = getStructName(dicom_info,roinumber);
     if nnz(ismember(struct2skip, struct_name)) % don't calculate structures defined in struct2skip
@@ -29,7 +29,7 @@ for j = 1:length(list_of_contoured_strucs)
     temp_struct_mask = zeros(0);
     for k = 1:length(list_of_slices) % for every slice in a given structure
         slice = dicom_info.ROIContourSequence.(list_of_contoured_strucs{j}).ContourSequence.(list_of_slices{k});
-        if ~strcmpi(slice.ContourGeometricType, 'POINT')
+        if ~strcmpi(slice.ContourGeometricType, 'POINT') % if the slice is NOT a point
             [slice_mask, slice_vetrices, zCoord] = calcSliceMask(slice, xVec, yVec);
             
             temp_struct_mask{k,1} = zCoord;
@@ -56,7 +56,7 @@ for j = 1:length(list_of_contoured_strucs)
        continue; 
     end
     
-    struct_zVec = sort(unique(cell2mat(temp_struct_mask(:,1))),'descend');
+    struct_zVec = sort(unique(cell2mat(temp_struct_mask(:,1))));
     for ii=1:length(struct_zVec) %for each slice
         slice_masks = temp_struct_mask(cell2mat(temp_struct_mask(:,1)) == struct_zVec(ii),2);
         slice_vetrices = temp_struct_mask(cell2mat(temp_struct_mask(:,1)) == struct_zVec(ii),3);

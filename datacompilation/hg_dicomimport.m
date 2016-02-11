@@ -1,5 +1,8 @@
 function tps_data = hg_dicomimport( varargin )
-
+% 
+% Hubert Gabrys <hubert.gabrys@gmail.com>, 2015-2016
+% This file is licensed under GPLv2
+%
 if length(varargin) == 1
     %old version
     dicompaths = varargin{1};
@@ -40,7 +43,7 @@ if ct_exists
     [cube_ct, xVec_ct, yVec_ct, zVec_ct] = hg_loadCTCube(ct_paths);
     xVec_new = (xVec_ct(1):resolution:xVec_ct(end))';
     yVec_new = (yVec_ct(1):resolution:yVec_ct(end))';
-    zVec_new = (zVec_ct(1):-resolution:zVec_ct(end))';
+    zVec_new = (zVec_ct(1):resolution:zVec_ct(end))';
     [x, y, z] = ndgrid(xVec_ct,yVec_ct,zVec_ct);
     [xi, yi, zi] = ndgrid(xVec_new,yVec_new,zVec_new);
     cube_ct_new = interpn(x,y,z,double(cube_ct),xi,yi,zi);
@@ -57,7 +60,7 @@ if size(rtdose_path,1) == 1
     if ~ct_exists
         xVec_new = (xVec_d(1):resolution:xVec_d(end))';
         yVec_new = (yVec_d(1):resolution:yVec_d(end))';
-        zVec_new = (zVec_d(1):-resolution:zVec_d(end))';
+        zVec_new = (zVec_d(1):resolution:zVec_d(end))';
     end
     [x, y, z] = ndgrid(xVec_d,yVec_d,zVec_d);
     [xi, yi, zi] = ndgrid(xVec_new,yVec_new,zVec_new);
@@ -77,11 +80,11 @@ elseif size(rtdose_path,1) == 2 && ~ct_exists
     if (length(zVec1_d) > length(zVec2_d)) && (length(xVec1_d) == length(xVec2_d)) && (length(yVec1_d) == length(yVec2_d))
         xVec_new = (xVec1_d(1):resolution:xVec1_d(end))';
         yVec_new = (yVec1_d(1):resolution:yVec1_d(end))';
-        zVec_new = (zVec1_d(1):-resolution:zVec1_d(end))';
+        zVec_new = (zVec1_d(1):resolution:zVec1_d(end))';
     elseif (length(xVec1_d) == length(xVec2_d)) && (length(yVec1_d) == length(yVec2_d))
         xVec_new = (xVec2_d(1):resolution:xVec2_d(end))';
         yVec_new = (yVec2_d(1):resolution:yVec2_d(end))';
-        zVec_new = (zVec2_d(1):-resolution:zVec2_d(end))';
+        zVec_new = (zVec2_d(1):resolution:zVec2_d(end))';
     end
     [x, y, z] = ndgrid(xVec1_d,yVec1_d,zVec1_d);
     [xi, yi, zi] = ndgrid(xVec_new,yVec_new,zVec_new);
@@ -115,14 +118,14 @@ elseif size(rtdose_path,1) > 2
         %         cube_d = sum(cube_d,4);
         error('More than 2 RTDOSE dicoms not supported!');
     end
-    if zVec_d(2) - zVec_d(1) > 0 % Flip cube if zVec is ascending
+    if zVec_d(2) - zVec_d(1) < 0 % Flip cube if zVec is descending
         zVec_d(:,1) = flip(zVec_d);
         cube_d = flip(cube_d, 3);
     end
     if ~ct_exists
         xVec_new = (xVec_d(1):resolution:xVec_d(end))';
         yVec_new = (yVec_d(1):resolution:yVec_d(end))';
-        zVec_new = (zVec_d(1):-resolution:zVec_d(end))';
+        zVec_new = (zVec_d(1):resolution:zVec_d(end))';
     end
     [x, y, z] = ndgrid(xVec_d,yVec_d,zVec_d);
     [xi, yi, zi] = ndgrid(xVec_new,yVec_new,zVec_new);

@@ -167,10 +167,11 @@ oldpointer = get(handles.figure1, 'pointer');
 set(handles.figure1, 'pointer', 'watch')
 drawnow;
 
-[filename, directory] = uigetfile([handles.defaultdatapath '*.mat'],...
+[filename, directory] = uigetfile([handles.defaultdatapath 'mat'],...
     'Choose tps_data.mat file...');
 if ischar(filename) && ischar(directory)
-    load([directory '\' filename]);
+    load(fullfile(directory, filename));
+    %load([directory '\' filename]);
     handles.output_directory = directory;
     handles.s_fieldnames = fieldnames(tps_data.structures);
     setPatName(handles);

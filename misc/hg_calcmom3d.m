@@ -4,7 +4,9 @@ function m = hg_calcmom3d(V,p,q,r,inv, varargin)
 % p,g,r - moment numbers
 % inv - invariance
 %
-% h.gabrys@dkfz.de, 2014-15
+% Hubert Gabrys <hubert.gabrys@gmail.com>, 2015-2016
+% This file is licensed under GPLv2
+%
 
 if length(varargin)==3
     x1spac = varargin{1};
@@ -27,7 +29,7 @@ switch inv
         Vq = (X1.^p).*(X2.^q).*(X3.^r).*V;
         m = sum(Vq(:));
         
-    case 'trans'
+    case 'transinv'
         % Define grid
         [X1,X2,X3] = ndgrid(0:size(V,1)-1, 0:size(V,2)-1, 0:size(V,3)-1);
         X1 = X1*x1spac;
@@ -41,9 +43,9 @@ switch inv
         Vq = ((X1-x1bar2).^p).*((X2-x2bar2).^q).*((X3-x3bar2).^r).*V;
         m = sum(Vq(:));
         
-    case 'scale'
+    case 'scaleinv'
         % Calculate normalization factor
-        norm = (hg_calcmom3d(V,0,0,0,'trans',x1spac, x2spac, x3spac)^((p+q+r)/3+1));
+        norm = (hg_calcmom3d(V,0,0,0,'transinv',x1spac, x2spac, x3spac)^((p+q+r)/3+1));
         % Calculate moments
-        m = hg_calcmom3d(V,p,q,r,'trans',x1spac, x2spac, x3spac)/norm;
+        m = hg_calcmom3d(V,p,q,r,'transinv',x1spac, x2spac, x3spac)/norm;
 end
