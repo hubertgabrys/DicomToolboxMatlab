@@ -26,30 +26,32 @@ for i=1:length(strucnames)
     dvh = hg_calcdvh(struct_cube);
     dvh = dvh.array;
     
-    % subvolumes
-    resolution = 2;
-    subvolumes1 = hg_calcStructSubvolumes(struct_cube, resolution);
-    resolution = 3;
-    subvolumes2 = hg_calcStructSubvolumes(struct_cube, resolution);
+%     % subvolumes
+%     resolution = 2;
+%     subvolumes1 = hg_calcStructSubvolumes(struct_cube, resolution);
+%     resolution = 3;
+%     subvolumes2 = hg_calcStructSubvolumes(struct_cube, resolution);
     
     % spatial moments
     %struct_cube = hg_loadcube(tps_data, strucname, 'dose', true );
-    %mom_def = [0 0 0; eye(3); 1 1 0; 1 0 1; 0 1 1; 1 1 1; 2*eye(3); 3*eye(3)];
-    mom_def = npermutek(0:4,3);
+    mom_def = [1 1 0; 1 0 1; 0 1 1; 2 0 0; 0 2 0; 0 0 2;...
+        1 1 1; 2 1 0; 2 0 1; 1 2 0; 0 2 1; 0 1 2; 1 0 2;...
+        3 0 0; 0 3 0; 0 0 3];
+    %mom_def = npermutek(0:4,3);
     moments = hg_calcdosemoments(struct_cube, mom_def);
     
     % merge results
     if exist('dosimetric_features', 'var')
-        dosimetric_features = [dosimetric_features; [dvh, subvolumes1, subvolumes2, moments]];
+        dosimetric_features = [dosimetric_features; [dvh, moments]];
     else
-        dosimetric_features = [dvh, subvolumes1, subvolumes2, moments];
+        dosimetric_features = [dvh, moments];
     end
     
     %struct_cube = hg_loadcube(tps_data, strucname, 'ct', false );
     struct_cube_mask = struct_cube>0;
     xspacing = tps_data.dose.xVec(2)-tps_data.dose.xVec(1);
     yspacing = tps_data.dose.yVec(2)-tps_data.dose.yVec(1);
-    zspacing = tps_data.dose.zVec(1)-tps_data.dose.zVec(2);
+    zspacing = tps_data.dose.zVec(2)-tps_data.dose.zVec(1);
 %     xspacing = 1;
 %     yspacing = 1;
 %     zspacing = 1;

@@ -75,12 +75,12 @@ varargout{1} = handles.output;
 
 
 function dir_path_field_Callback(hObject, eventdata, handles)
-input_dir = get(handles.dir_path_field,'String');
-if input_dir(end) ~= '\';
-    input_dir = [input_dir '\'];
-    set(handles.dir_path_field,'String',input_dir);
-    guidata(hObject, handles);
-end
+%input_dir = get(handles.dir_path_field,'String');
+% if input_dir(end) ~= '\';
+%     input_dir = [input_dir '\'];
+%     set(handles.dir_path_field,'String',input_dir);
+%     guidata(hObject, handles);
+% end
 set(handles.import_button,'Enable','on');
 
 
@@ -97,7 +97,7 @@ end
 function browse_button_Callback(hObject, eventdata, handles)
 input_dir = uigetdir('', 'Choose the input directory...');
 if input_dir ~= 0
-    input_dir = [input_dir '\'];
+    %input_dir = [input_dir '\'];
     set(handles.dir_path_field,'String',input_dir);
     % Update handles structure
     guidata(hObject, handles);
