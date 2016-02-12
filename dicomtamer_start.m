@@ -22,7 +22,7 @@ function varargout = dicomtamer_start(varargin)
 
 % Edit the above text to modify the response to help dicomtamer_start
 
-% Last Modified by GUIDE v2.5 27-Oct-2015 16:08:28
+% Last Modified by GUIDE v2.5 12-Feb-2016 09:46:39
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -141,22 +141,22 @@ guidata(hObject, handles)
 set(handles.figure1, 'pointer', oldpointer)
 
 
-% --- Executes on button press in Plot_button.
-function Plot_button_Callback(hObject, eventdata, handles)
-
-% show the hourglass during computation
-oldpointer = get(handles.figure1, 'pointer');
-set(handles.figure1, 'pointer', 'watch')
-drawnow;
-
-% Update handles structure
-guidata(hObject, handles)
-axes(handles.axes1);
-handles.slice = plotDoseAndCT( hObject, eventdata, handles );
-guidata(hObject, handles)
-
-% set back an arrow
-set(handles.figure1, 'pointer', oldpointer)
+% % --- Executes on button press in Plot_button.
+% function Plot_button_Callback(hObject, eventdata, handles)
+% 
+% % show the hourglass during computation
+% oldpointer = get(handles.figure1, 'pointer');
+% set(handles.figure1, 'pointer', 'watch')
+% drawnow;
+% 
+% % Update handles structure
+% guidata(hObject, handles)
+% axes(handles.axes1);
+% handles.slice = plotDoseAndCT( hObject, eventdata, handles );
+% guidata(hObject, handles)
+% 
+% % set back an arrow
+% set(handles.figure1, 'pointer', oldpointer)
 
 
 % --- Executes on button press in LoadTPSdata_button.
@@ -188,6 +188,474 @@ function setPatName(handles)
 [~, deepestFolder] = fileparts(handles.output_directory(1:end-1));
 set(handles.patname_text, 'String', deepestFolder);
 
+% --- Executes on button press in structure32_checkbox.
+function checkbox53_Callback(hObject, eventdata, handles)
+% hObject    handle to structure32_checkbox (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of structure32_checkbox
+checkboxmanager(51, hObject, eventdata, handles);
+
+function enablecheckboxes(hObject, eventdata, handles)
+% set checkbox names
+for loopIndex = 1:numel(handles.s_fieldnames)
+    set(eval(['handles.structure' num2str(loopIndex) '_checkbox']), 'String', handles.s_fieldnames{loopIndex})
+    set(eval(['handles.structure' num2str(loopIndex) '_checkbox']), 'Visible', 'on')
+end
+
+
+function checkboxmanager( number, hObject, eventdata, handles)
+if get(hObject,'Value') == 1
+    handles.selected_structures(number) = 1;
+    r = randi([0 1]);
+    g = randi([0 1]);
+    b = randi([0 1]);
+    set(hObject, 'ForegroundColor', [r g b]);
+    if (r*g*b == 1 || (r == 1 && g == 1 && b == 0) || (r == 0 && g == 1 && b == 0) || (r == 0 && g == 1 && b == 1))
+        set(hObject, 'BackgroundColor', [0 0 0]);
+    end
+else
+    handles.selected_structures(number) = 0;
+    set(hObject, 'ForegroundColor', [0 0 0]);
+    set(hObject, 'BackgroundColor', [1 1 1]);
+end
+% Update handles structure
+guidata(hObject, handles)
+
+
+% --- Executes on selection change in listbox1.
+function listbox1_Callback(hObject, eventdata, handles)
+% hObject    handle to listbox1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns listbox1 contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from listbox1
+
+
+% --- Executes during object creation, after setting all properties.
+function listbox1_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to listbox1 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: listbox controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% % --- Executes on button press in analyze_button.
+% function analyze_button_Callback(hObject, eventdata, handles)
+% % hObject    handle to analyze_button (see GCBO)
+% % eventdata  reserved - to be defined in a future version of MATLAB
+% % handles    structure with handles and user data (see GUIDATA)
+% contents = get(handles.visualization_popupmenu, 'Value');
+% 
+% switch contents
+%     case 1 %Check structure cube (parotid, eye)
+%         set(handles.analysisresult_text,'String', '');
+%         set(handles.analysisresult_text,'ForegroundColor', [0 0 0]);
+%         clearCheckboxes(hObject, eventdata, handles);
+%         set(handles.next_button,'Visible', 'on');
+%         % get right parotid string
+%         set(handles.analysisresult_text,'String', 'Choose right parotid and click next');
+%         uiwait;
+%         tmp = lookForEnabledCheckboxes(hObject, eventdata, handles);
+%         rpStr = handles.s_fieldnames{tmp};
+%         clearCheckboxes(hObject, eventdata, handles);
+%         % get left eye string
+%         set(handles.analysisresult_text,'String', 'Choose left eye and click next');
+%         uiwait;
+%         set(handles.next_button,'Visible', 'off');
+%         tmp = lookForEnabledCheckboxes(hObject, eventdata, handles);
+%         leStr = handles.s_fieldnames{tmp};
+%         clearCheckboxes(hObject, eventdata, handles);
+%         flag = checkStructureCube_eye2(handles.tps_data, rpStr, leStr);
+%         setTestResult(handles, flag);
+%         
+%     case 2 %Check structure cube (parotid, lung)
+%         set(handles.analysisresult_text,'String', '');
+%         set(handles.analysisresult_text,'ForegroundColor', [0 0 0]);
+%         clearCheckboxes(hObject, eventdata, handles);
+%         set(handles.next_button,'Visible', 'on');
+%         % get right parotid string
+%         set(handles.analysisresult_text,'String', 'Choose right parotid and click next');
+%         uiwait; % wait for clicking 'next' button
+%         tmp = lookForEnabledCheckboxes(hObject, eventdata, handles);
+%         rpStr = handles.s_fieldnames{tmp};
+%         clearCheckboxes(hObject, eventdata, handles);
+%         % get left lung string
+%         set(handles.analysisresult_text,'String', 'Choose left lung and click next');
+%         uiwait; % wait for clicking 'next' button
+%         set(handles.next_button,'Visible', 'off');
+%         tmp = lookForEnabledCheckboxes(hObject, eventdata, handles);
+%         leStr = handles.s_fieldnames{tmp};
+%         clearCheckboxes(hObject, eventdata, handles);
+%         flag = checkStructureCube_lung2(handles.tps_data, rpStr, leStr);
+%         setTestResult(handles, flag);
+%         
+%     case 3 %Calculate moments
+%         set(handles.analysisresult_text,'String', '');
+%         set(handles.analysisresult_text,'ForegroundColor', [0 0 0]);
+%         clearCheckboxes(hObject, eventdata, handles);
+%         %{
+%         set(handles.next_button,'Visible', 'on');
+%         set(handles.analysis_radio1, 'String', 'ipsilateral');
+%         set(handles.analysis_radio2, 'String', 'contralateral');
+%         set(handles.analysis_radio3, 'Visible', 'on');
+%         set(handles.uipanel3,'Visible', 'on');
+%         set(handles.analysisresult_text,'String', 'Choose struct and its location');
+%         uiwait; % wait for clicking 'next' button
+%         tmp = lookForEnabledCheckboxes(hObject, eventdata, handles);
+%         struct = handles.s_fieldnames{tmp};
+%         location = get(get(handles.uipanel3,'SelectedObject'),'String');
+%         if ~strcmp(location, 'nonlateral')
+%             set(handles.analysis_radio1, 'String', 'left');
+%             set(handles.analysis_radio2, 'String', 'right');
+%             set(handles.analysis_radio3, 'Visible', 'off');
+%             set(handles.analysisresult_text,'String', 'Left or right?');
+%             uiwait; % wait for clicking 'next' button
+%             side = get(get(handles.uipanel3,'SelectedObject'),'String');
+%             set(handles.analysis_radio1, 'String', 'ipsilateral');
+%             set(handles.analysis_radio2, 'String', 'contralateral');
+%             set(handles.analysis_radio3, 'Visible', 'on');
+%         elseif strcmp(location, 'nonlateral')
+%             side = 'x';
+%         end
+%         set(handles.next_button,'Visible', 'off');
+%         set(handles.uipanel3,'Visible', 'off');
+%         clearCheckboxes(hObject, eventdata, handles);
+%         %}
+%         % calculate moments
+%         %calculateMoments(handles.tps_data, struct, location, side, handles.output_directory);
+%         set(handles.analysisresult_text,'String', 'Not implemented yet!');
+%         set(handles.analysisresult_text,'ForegroundColor', [0 0.5 0]);
+%         %{
+%     case 4
+%         set(handles.analysisresult_text,'String', '');
+%         set(handles.analysisresult_text,'ForegroundColor', [0 0 0]);
+%         clearCheckboxes(hObject, eventdata, handles);
+%         set(handles.next_button,'Visible', 'on');
+%         
+%         set(handles.analysisresult_text,'String', 'Choose contralat. parotid');
+%         uiwait;
+%         tmp = lookForEnabledCheckboxes(hObject, eventdata, handles);
+%         contrapar = handles.s_fieldnames{tmp};
+%         clearCheckboxes(hObject, eventdata, handles);
+%         
+%         set(handles.analysisresult_text,'String', 'Choose ipsilat. parotid');
+%         uiwait;
+%         tmp = lookForEnabledCheckboxes(hObject, eventdata, handles);
+%         ipsipar = handles.s_fieldnames{tmp};
+%         clearCheckboxes(hObject, eventdata, handles);
+%         
+%         set(handles.analysisresult_text,'String', 'Is ipsiparotid left or right?');
+%         set(handles.uipanel3,'Visible', 'on');
+%         set(handles.analysis_radio1, 'String', 'left');
+%         set(handles.analysis_radio2, 'String', 'right');
+%         set(handles.analysis_radio3, 'Visible', 'off');
+%         uiwait; % wait for clicking 'next' button
+%         side = get(get(handles.uipanel3,'SelectedObject'),'String');
+%         set(handles.next_button,'Visible', 'off');
+%         set(handles.uipanel3,'Visible', 'off');
+%         clearCheckboxes(hObject, eventdata, handles);
+%         
+%         calculateMoments2(handles.tps_data, {ipsipar, contrapar}, side, handles.output_directory);
+%         
+%         set(handles.analysisresult_text,'String', 'Moments calculated!');
+%         set(handles.analysisresult_text,'ForegroundColor', [0 0.5 0]);
+%         
+%     case 5
+%         % prepare gui
+%         set(handles.analysisresult_text,'String', '');
+%         set(handles.analysisresult_text,'ForegroundColor', [0 0 0]);
+%         clearCheckboxes(hObject, eventdata, handles);
+%         set(handles.next_button,'Visible', 'on');
+%         
+%         % get left parotid
+%         set(handles.analysisresult_text,'String', 'Choose left parotid');
+%         uiwait;
+%         tmp = lookForEnabledCheckboxes(hObject, eventdata, handles);
+%         leftpar = handles.s_fieldnames{tmp};
+%         clearCheckboxes(hObject, eventdata, handles);
+%         
+%         % get right parotid
+%         set(handles.analysisresult_text,'String', 'Choose right parotid');
+%         uiwait;
+%         tmp = lookForEnabledCheckboxes(hObject, eventdata, handles);
+%         rightpar = handles.s_fieldnames{tmp};
+%         clearCheckboxes(hObject, eventdata, handles);
+%         
+%         % clean up gui
+%         set(handles.next_button,'Visible', 'off');
+%         set(handles.uipanel3,'Visible', 'off');
+%         clearCheckboxes(hObject, eventdata, handles);
+%         
+%         % calculate
+%         calculateMoments3(handles.tps_data, {leftpar, rightpar}, handles.output_directory);
+%         
+%         % inform when finished
+%         set(handles.analysisresult_text,'String', 'Moments calculated!');
+%         set(handles.analysisresult_text,'ForegroundColor', [0 0.5 0]);
+%         %}
+%         
+%     case 4 %Calculate DVH, mean dose etc.
+%         % prepare gui
+%         set(handles.analysisresult_text,'String', '');
+%         set(handles.analysisresult_text,'ForegroundColor', [0 0 0]);
+%         clearCheckboxes(hObject, eventdata, handles);
+%         set(handles.next_button,'Visible', 'on');
+%         
+%         % let user select structures and calculate dvhs
+%         set(handles.analysisresult_text,'String', 'Choose structures for dvh calculation');
+%         uiwait;
+%         struct_sel = lookForEnabledCheckboxes2(hObject, eventdata, handles);
+%         dvh = hg_calcdvh(handles.tps_data, handles.s_fieldnames(struct_sel == 1));
+%         writetable(dvh.array, [handles.output_directory 'dvh.txt']);
+%         % dvh plot
+%         struct_sel = find(struct_sel == 1);
+%         for j=1:length(struct_sel)
+%             linecolor = get(eval(['handles.structure' ...
+%                 num2str(struct_sel(j)) '_checkbox']), 'ForegroundColor');
+%             title = handles.s_fieldnames{struct_sel(j)};
+%             hg_plotdvh(dvh.args, dvh.vals.(title), linecolor, title, handles.axes3);
+%             hold on;
+%         end
+%         hold off;
+%         
+%         % clean up gui
+%         set(handles.next_button,'Visible', 'off');
+%         set(handles.uipanel3,'Visible', 'off');
+%         clearCheckboxes(hObject, eventdata, handles);
+%         
+%         % inform when finished
+%         set(handles.analysisresult_text,'String', 'DVHs calculated!');
+%         set(handles.analysisresult_text,'ForegroundColor', [0 0.5 0]);
+% end
+
+function slice = plotDoseAndCT(hObject, eventdata, handles)
+struct_sel = lookForEnabledCheckboxes2(hObject, eventdata, handles);
+if sum(struct_sel) == 0
+    colors = [0 0 0];
+else
+    colors = getCheckboxColors(hObject, eventdata, handles);
+end
+% if handles.slice ~= -1
+%     shift = (handles.tps_data.ct.zVec(handles.slice)-handles.tps_data.dose.zVec(handles.slice))/(handles.tps_data.ct.zVec(1)-handles.tps_data.ct.zVec(2)); % I NEED MORE ELEGANT SOLUTION!!!
+% else
+%     shift = 0;
+% end
+% plot ct
+if isfield(handles.tps_data, 'ct')
+    slice = hg_plotct(handles.tps_data, handles.s_fieldnames(struct_sel == 1), handles.slice, colors, handles.axes1);
+    handles.slice = slice;
+end
+% plot dose
+if isfield(handles.tps_data, 'dose')
+    slice = hg_plotdose(handles.tps_data, handles.s_fieldnames(struct_sel == 1), handles.slice, colors, handles.axes2);
+    handles.slice = slice;
+end
+% plot 3rd axes
+if isfield(handles.tps_data, 'dose')
+        cla(handles.axes3) % clear axes before plotting
+        %drawnow
+        struct_sel = find(struct_sel == 1);
+        contents = get(handles.visualization_popupmenu, 'Value');
+        switch contents
+            case 1
+                for j=1:length(struct_sel)
+                    linecolor = get(eval(['handles.structure' ...
+                        num2str(struct_sel(j)) '_checkbox']), 'ForegroundColor');
+                    %title = handles.s_fieldnames{struct_sel(j)};
+                    dvh = hg_calcdvh(handles.tps_data.dose.cube.*handles.tps_data.structures.(handles.s_fieldnames{struct_sel(j)}).indicator_mask);
+                    hold( handles.axes3, 'on');
+                    hg_plotdvh(dvh.args, dvh.vals, linecolor, '', handles.axes3);
+                end
+                hold( handles.axes3, 'off');
+            case 2
+                if verLessThan('matlab','8.4.0')
+                    cube = handles.tps_data.dose.cube.*handles.tps_data.structures.(handles.s_fieldnames{struct_sel(1)}).indicator_mask;
+                    xVec = handles.tps_data.dose.xVec;
+                    yVec = handles.tps_data.dose.yVec;
+                    zVec = handles.tps_data.dose.zVec;
+                    hg_plot3Ddosedensity( cube, xVec, yVec, zVec, handles.axes3 );
+                else
+                    warning('The pcolor3 function does not work quite right on Matlab R2014b or newer :(')
+                end
+        end
+end
+guidata(hObject, handles)
+
+
+
+function setTestResult(handles,flag)
+if flag
+    set(handles.analysisresult_text,'String', 'Test passed!');
+    set(handles.analysisresult_text,'ForegroundColor', [0 0.5 0]);
+else
+    set(handles.analysisresult_text,'String', 'Test failed!');
+    set(handles.analysisresult_text,'ForegroundColor', [1 0 0]);
+end
+
+function index = lookForEnabledCheckboxes(hObject, eventdata, handles)
+% set checkbox names
+for loopIndex = 1:numel(handles.s_fieldnames)
+    value = get(eval(['handles.structure' num2str(loopIndex) '_checkbox']), 'Value');
+    if value
+        index = loopIndex;
+    end
+end
+
+function index = lookForEnabledCheckboxes2(hObject, eventdata, handles)
+% set checkbox names
+index = zeros(numel(handles.s_fieldnames),1);
+for loopIndex = 1:numel(handles.s_fieldnames)
+    value = get(eval(['handles.structure' num2str(loopIndex) '_checkbox']), 'Value');
+    if value
+        index(loopIndex) = 1;
+    end
+end
+
+function colors = getCheckboxColors(hObject, eventdata, handles)
+% set checkbox names
+%colors = zeros(numel(handles.s_fieldnames)-1,3);
+index = 1;
+for loopIndex = 1:numel(handles.s_fieldnames)
+    value = get(eval(['handles.structure' num2str(loopIndex) '_checkbox']), 'Value');
+    if value
+        colors(index,:) = get(eval(['handles.structure' num2str(loopIndex) '_checkbox']), 'ForegroundColor');
+        index = index+1;
+    end
+end
+
+function clearCheckboxes(hObject, eventdata, handles)
+% set checkbox names
+for loopIndex = 1:numel(handles.s_fieldnames)
+    set(eval(['handles.structure' num2str(loopIndex) '_checkbox']), 'Value', 0);
+    set(eval(['handles.structure' num2str(loopIndex) '_checkbox']), 'ForegroundColor', [0 0 0]);
+    set(eval(['handles.structure' num2str(loopIndex) '_checkbox']), 'BackgroundColor', [1 1 1]);
+end
+handles.selected_structures = handles.selected_structures * 0;
+guidata(hObject, handles);
+
+% --- Executes on button press in next_button.
+function next_button_Callback(hObject, eventdata, handles)
+% hObject    handle to next_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+guidata(hObject, handles);
+uiresume(gcbf);
+
+
+% --- Executes on selection change in visualization_popupmenu.
+function visualization_popupmenu_Callback(hObject, eventdata, handles)
+% hObject    handle to visualization_popupmenu (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns visualization_popupmenu contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from visualization_popupmenu
+
+
+% --- Executes during object creation, after setting all properties.
+function visualization_popupmenu_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to visualization_popupmenu (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+% --- Executes when selected object is changed in uipanel3.
+function uipanel3_SelectionChangeFcn(hObject, eventdata, handles)
+% hObject    handle to the selected object in uipanel3
+% eventdata  structure with the following fields (see UIBUTTONGROUP)
+%	EventName: string 'SelectionChanged' (read only)
+%	OldValue: handle of the previously selected object or empty if none was selected
+%	NewValue: handle of the currently selected object
+% handles    structure with handles and user data (see GUIDATA)
+%disp(get(get(handles.uipanel3,'SelectedObject'),'String'));
+
+
+
+% --- Executes on button press in reset_button.
+function reset_button_Callback(hObject, eventdata, handles)
+% hObject    handle to reset_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+OrigDlgH = ancestor(hObject, 'figure');
+delete(OrigDlgH);
+dicomtamer_start();
+
+
+% --- Executes on button press in calcFeatures.
+function calcFeatures_Callback(hObject, eventdata, handles)
+if get(handles.batch_tick, 'Value') == 0
+    % show the hourglass during computation
+    oldpointer = get(handles.figure1, 'pointer');
+    set(handles.figure1, 'pointer', 'watch')
+    drawnow;
+    
+    if isfield(handles, 'tps_data')
+        features = calculateFeatures(handles.tps_data);
+        writetable(features, fullfile(handles.output_directory, 'features.csv'),'Delimiter',';');
+    else
+        errordlg('Load tps.mat file first!','tps.mat error');
+    end
+    
+    set(handles.figure1, 'pointer', oldpointer);
+    drawnow;
+else
+    h = warndlg('DicomTamer will load features from xls files if found in patients'' directories. If you want to calculate all features from scratch, delete the xls files first!');
+    uiwait(h);
+    input_dir = uigetdir(handles.defaultdatapath, 'Choose Input Directory...');
+    showGUI = true;
+    recalcFeatures = false;
+    calcFeatures_batch( input_dir, recalcFeatures, showGUI);
+end
+
+
+
+% --- Executes on button press in select_all_button.
+function select_all_button_Callback(hObject, eventdata, handles)
+% hObject    handle to select_all_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in select_none_button.
+function select_none_button_Callback(hObject, eventdata, handles)
+% hObject    handle to select_none_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+
+% --- Executes on button press in newloader_button.
+function newloader_button_Callback(hObject, eventdata, handles)
+% hObject    handle to newloader_button (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+if get(handles.batch_tick, 'Value') == 0
+    hg_importDicomGUI
+else
+    hg_importDicomBatchGUI
+end
+
+
+% --- Executes on button press in batch_tick.
+function batch_tick_Callback(hObject, eventdata, handles)
+% hObject    handle to batch_tick (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of batch_tick
 
 % --- Executes on button press in structure1_checkbox.
 function structure1_checkbox_Callback(hObject, eventdata, handles)
@@ -669,454 +1137,3 @@ function structure50_checkbox_Callback(hObject, eventdata, handles)
 % Hint: get(hObject,'Value') returns toggle state of structure32_checkbox
 checkboxmanager(50, hObject, eventdata, handles);
 
-% --- Executes on button press in structure32_checkbox.
-function checkbox53_Callback(hObject, eventdata, handles)
-% hObject    handle to structure32_checkbox (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of structure32_checkbox
-checkboxmanager(51, hObject, eventdata, handles);
-
-function enablecheckboxes(hObject, eventdata, handles)
-% set checkbox names
-for loopIndex = 1:numel(handles.s_fieldnames)
-    set(eval(['handles.structure' num2str(loopIndex) '_checkbox']), 'String', handles.s_fieldnames{loopIndex})
-    set(eval(['handles.structure' num2str(loopIndex) '_checkbox']), 'Visible', 'on')
-end
-
-
-function checkboxmanager( number, hObject, eventdata, handles)
-if get(hObject,'Value') == 1
-    handles.selected_structures(number) = 1;
-    r = randi([0 1]);
-    g = randi([0 1]);
-    b = randi([0 1]);
-    set(hObject, 'ForegroundColor', [r g b]);
-    if (r*g*b == 1 || (r == 1 && g == 1 && b == 0) || (r == 0 && g == 1 && b == 0) || (r == 0 && g == 1 && b == 1))
-        set(hObject, 'BackgroundColor', [0 0 0]);
-    end
-else
-    handles.selected_structures(number) = 0;
-    set(hObject, 'ForegroundColor', [0 0 0]);
-    set(hObject, 'BackgroundColor', [1 1 1]);
-end
-% Update handles structure
-guidata(hObject, handles)
-
-
-% --- Executes on selection change in listbox1.
-function listbox1_Callback(hObject, eventdata, handles)
-% hObject    handle to listbox1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: contents = cellstr(get(hObject,'String')) returns listbox1 contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from listbox1
-
-
-% --- Executes during object creation, after setting all properties.
-function listbox1_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to listbox1 (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: listbox controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-% --- Executes on button press in analyze_button.
-function analyze_button_Callback(hObject, eventdata, handles)
-% hObject    handle to analyze_button (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-contents = get(handles.analyze_popupmenu, 'Value');
-
-switch contents
-    case 1 %Check structure cube (parotid, eye)
-        set(handles.analysisresult_text,'String', '');
-        set(handles.analysisresult_text,'ForegroundColor', [0 0 0]);
-        clearCheckboxes(hObject, eventdata, handles);
-        set(handles.next_button,'Visible', 'on');
-        % get right parotid string
-        set(handles.analysisresult_text,'String', 'Choose right parotid and click next');
-        uiwait;
-        tmp = lookForEnabledCheckboxes(hObject, eventdata, handles);
-        rpStr = handles.s_fieldnames{tmp};
-        clearCheckboxes(hObject, eventdata, handles);
-        % get left eye string
-        set(handles.analysisresult_text,'String', 'Choose left eye and click next');
-        uiwait;
-        set(handles.next_button,'Visible', 'off');
-        tmp = lookForEnabledCheckboxes(hObject, eventdata, handles);
-        leStr = handles.s_fieldnames{tmp};
-        clearCheckboxes(hObject, eventdata, handles);
-        flag = checkStructureCube_eye2(handles.tps_data, rpStr, leStr);
-        setTestResult(handles, flag);
-        
-    case 2 %Check structure cube (parotid, lung)
-        set(handles.analysisresult_text,'String', '');
-        set(handles.analysisresult_text,'ForegroundColor', [0 0 0]);
-        clearCheckboxes(hObject, eventdata, handles);
-        set(handles.next_button,'Visible', 'on');
-        % get right parotid string
-        set(handles.analysisresult_text,'String', 'Choose right parotid and click next');
-        uiwait; % wait for clicking 'next' button
-        tmp = lookForEnabledCheckboxes(hObject, eventdata, handles);
-        rpStr = handles.s_fieldnames{tmp};
-        clearCheckboxes(hObject, eventdata, handles);
-        % get left lung string
-        set(handles.analysisresult_text,'String', 'Choose left lung and click next');
-        uiwait; % wait for clicking 'next' button
-        set(handles.next_button,'Visible', 'off');
-        tmp = lookForEnabledCheckboxes(hObject, eventdata, handles);
-        leStr = handles.s_fieldnames{tmp};
-        clearCheckboxes(hObject, eventdata, handles);
-        flag = checkStructureCube_lung2(handles.tps_data, rpStr, leStr);
-        setTestResult(handles, flag);
-        
-    case 3 %Calculate moments
-        set(handles.analysisresult_text,'String', '');
-        set(handles.analysisresult_text,'ForegroundColor', [0 0 0]);
-        clearCheckboxes(hObject, eventdata, handles);
-        %{
-        set(handles.next_button,'Visible', 'on');
-        set(handles.analysis_radio1, 'String', 'ipsilateral');
-        set(handles.analysis_radio2, 'String', 'contralateral');
-        set(handles.analysis_radio3, 'Visible', 'on');
-        set(handles.uipanel3,'Visible', 'on');
-        set(handles.analysisresult_text,'String', 'Choose struct and its location');
-        uiwait; % wait for clicking 'next' button
-        tmp = lookForEnabledCheckboxes(hObject, eventdata, handles);
-        struct = handles.s_fieldnames{tmp};
-        location = get(get(handles.uipanel3,'SelectedObject'),'String');
-        if ~strcmp(location, 'nonlateral')
-            set(handles.analysis_radio1, 'String', 'left');
-            set(handles.analysis_radio2, 'String', 'right');
-            set(handles.analysis_radio3, 'Visible', 'off');
-            set(handles.analysisresult_text,'String', 'Left or right?');
-            uiwait; % wait for clicking 'next' button
-            side = get(get(handles.uipanel3,'SelectedObject'),'String');
-            set(handles.analysis_radio1, 'String', 'ipsilateral');
-            set(handles.analysis_radio2, 'String', 'contralateral');
-            set(handles.analysis_radio3, 'Visible', 'on');
-        elseif strcmp(location, 'nonlateral')
-            side = 'x';
-        end
-        set(handles.next_button,'Visible', 'off');
-        set(handles.uipanel3,'Visible', 'off');
-        clearCheckboxes(hObject, eventdata, handles);
-        %}
-        % calculate moments
-        %calculateMoments(handles.tps_data, struct, location, side, handles.output_directory);
-        set(handles.analysisresult_text,'String', 'Not implemented yet!');
-        set(handles.analysisresult_text,'ForegroundColor', [0 0.5 0]);
-        %{
-    case 4
-        set(handles.analysisresult_text,'String', '');
-        set(handles.analysisresult_text,'ForegroundColor', [0 0 0]);
-        clearCheckboxes(hObject, eventdata, handles);
-        set(handles.next_button,'Visible', 'on');
-        
-        set(handles.analysisresult_text,'String', 'Choose contralat. parotid');
-        uiwait;
-        tmp = lookForEnabledCheckboxes(hObject, eventdata, handles);
-        contrapar = handles.s_fieldnames{tmp};
-        clearCheckboxes(hObject, eventdata, handles);
-        
-        set(handles.analysisresult_text,'String', 'Choose ipsilat. parotid');
-        uiwait;
-        tmp = lookForEnabledCheckboxes(hObject, eventdata, handles);
-        ipsipar = handles.s_fieldnames{tmp};
-        clearCheckboxes(hObject, eventdata, handles);
-        
-        set(handles.analysisresult_text,'String', 'Is ipsiparotid left or right?');
-        set(handles.uipanel3,'Visible', 'on');
-        set(handles.analysis_radio1, 'String', 'left');
-        set(handles.analysis_radio2, 'String', 'right');
-        set(handles.analysis_radio3, 'Visible', 'off');
-        uiwait; % wait for clicking 'next' button
-        side = get(get(handles.uipanel3,'SelectedObject'),'String');
-        set(handles.next_button,'Visible', 'off');
-        set(handles.uipanel3,'Visible', 'off');
-        clearCheckboxes(hObject, eventdata, handles);
-        
-        calculateMoments2(handles.tps_data, {ipsipar, contrapar}, side, handles.output_directory);
-        
-        set(handles.analysisresult_text,'String', 'Moments calculated!');
-        set(handles.analysisresult_text,'ForegroundColor', [0 0.5 0]);
-        
-    case 5
-        % prepare gui
-        set(handles.analysisresult_text,'String', '');
-        set(handles.analysisresult_text,'ForegroundColor', [0 0 0]);
-        clearCheckboxes(hObject, eventdata, handles);
-        set(handles.next_button,'Visible', 'on');
-        
-        % get left parotid
-        set(handles.analysisresult_text,'String', 'Choose left parotid');
-        uiwait;
-        tmp = lookForEnabledCheckboxes(hObject, eventdata, handles);
-        leftpar = handles.s_fieldnames{tmp};
-        clearCheckboxes(hObject, eventdata, handles);
-        
-        % get right parotid
-        set(handles.analysisresult_text,'String', 'Choose right parotid');
-        uiwait;
-        tmp = lookForEnabledCheckboxes(hObject, eventdata, handles);
-        rightpar = handles.s_fieldnames{tmp};
-        clearCheckboxes(hObject, eventdata, handles);
-        
-        % clean up gui
-        set(handles.next_button,'Visible', 'off');
-        set(handles.uipanel3,'Visible', 'off');
-        clearCheckboxes(hObject, eventdata, handles);
-        
-        % calculate
-        calculateMoments3(handles.tps_data, {leftpar, rightpar}, handles.output_directory);
-        
-        % inform when finished
-        set(handles.analysisresult_text,'String', 'Moments calculated!');
-        set(handles.analysisresult_text,'ForegroundColor', [0 0.5 0]);
-        %}
-        
-    case 4 %Calculate DVH, mean dose etc.
-        % prepare gui
-        set(handles.analysisresult_text,'String', '');
-        set(handles.analysisresult_text,'ForegroundColor', [0 0 0]);
-        clearCheckboxes(hObject, eventdata, handles);
-        set(handles.next_button,'Visible', 'on');
-        
-        % let user select structures and calculate dvhs
-        set(handles.analysisresult_text,'String', 'Choose structures for dvh calculation');
-        uiwait;
-        struct_sel = lookForEnabledCheckboxes2(hObject, eventdata, handles);
-        dvh = hg_calcdvh(handles.tps_data, handles.s_fieldnames(struct_sel == 1));
-        writetable(dvh.array, [handles.output_directory 'dvh.txt']);
-        % dvh plot
-        struct_sel = find(struct_sel == 1);
-        for j=1:length(struct_sel)
-            linecolor = get(eval(['handles.structure' ...
-                num2str(struct_sel(j)) '_checkbox']), 'ForegroundColor');
-            title = handles.s_fieldnames{struct_sel(j)};
-            hg_plotdvh(dvh.args, dvh.vals.(title), linecolor, title, handles.axes3);
-            hold on;
-        end
-        hold off;
-        
-        % clean up gui
-        set(handles.next_button,'Visible', 'off');
-        set(handles.uipanel3,'Visible', 'off');
-        clearCheckboxes(hObject, eventdata, handles);
-        
-        % inform when finished
-        set(handles.analysisresult_text,'String', 'DVHs calculated!');
-        set(handles.analysisresult_text,'ForegroundColor', [0 0.5 0]);
-end
-
-function slice = plotDoseAndCT(hObject, eventdata, handles)
-struct_sel = lookForEnabledCheckboxes2(hObject, eventdata, handles);
-if sum(struct_sel) == 0
-    colors = [0 0 0];
-else
-    colors = getCheckboxColors(hObject, eventdata, handles);
-end
-% if handles.slice ~= -1
-%     shift = (handles.tps_data.ct.zVec(handles.slice)-handles.tps_data.dose.zVec(handles.slice))/(handles.tps_data.ct.zVec(1)-handles.tps_data.ct.zVec(2)); % I NEED MORE ELEGANT SOLUTION!!!
-% else
-%     shift = 0;
-% end
-if isfield(handles.tps_data, 'ct')
-    slice = hg_plotct(handles.tps_data, handles.s_fieldnames(struct_sel == 1), handles.slice, colors, handles.axes1);
-    handles.slice = slice;
-end
-if isfield(handles.tps_data, 'dose')
-    slice = hg_plotdose(handles.tps_data, handles.s_fieldnames(struct_sel == 1), handles.slice, colors, handles.axes2);
-    handles.slice = slice;
-end
-if isfield(handles.tps_data, 'dose')
-        cla(handles.axes3) % clear axes before plotting
-        %drawnow
-        struct_sel = find(struct_sel == 1);
-        for j=1:length(struct_sel)
-            linecolor = get(eval(['handles.structure' ...
-                num2str(struct_sel(j)) '_checkbox']), 'ForegroundColor');
-            %title = handles.s_fieldnames{struct_sel(j)};
-            dvh = hg_calcdvh(handles.tps_data.dose.cube.*handles.tps_data.structures.(handles.s_fieldnames{struct_sel(j)}).indicator_mask);
-            hold( handles.axes3, 'on');
-            hg_plotdvh(dvh.args, dvh.vals, linecolor, '', handles.axes3);
-        end
-        hold( handles.axes3, 'off');
-end
-guidata(hObject, handles)
-
-
-
-function setTestResult(handles,flag)
-if flag
-    set(handles.analysisresult_text,'String', 'Test passed!');
-    set(handles.analysisresult_text,'ForegroundColor', [0 0.5 0]);
-else
-    set(handles.analysisresult_text,'String', 'Test failed!');
-    set(handles.analysisresult_text,'ForegroundColor', [1 0 0]);
-end
-
-function index = lookForEnabledCheckboxes(hObject, eventdata, handles)
-% set checkbox names
-for loopIndex = 1:numel(handles.s_fieldnames)
-    value = get(eval(['handles.structure' num2str(loopIndex) '_checkbox']), 'Value');
-    if value
-        index = loopIndex;
-    end
-end
-
-function index = lookForEnabledCheckboxes2(hObject, eventdata, handles)
-% set checkbox names
-index = zeros(numel(handles.s_fieldnames),1);
-for loopIndex = 1:numel(handles.s_fieldnames)
-    value = get(eval(['handles.structure' num2str(loopIndex) '_checkbox']), 'Value');
-    if value
-        index(loopIndex) = 1;
-    end
-end
-
-function colors = getCheckboxColors(hObject, eventdata, handles)
-% set checkbox names
-%colors = zeros(numel(handles.s_fieldnames)-1,3);
-index = 1;
-for loopIndex = 1:numel(handles.s_fieldnames)
-    value = get(eval(['handles.structure' num2str(loopIndex) '_checkbox']), 'Value');
-    if value
-        colors(index,:) = get(eval(['handles.structure' num2str(loopIndex) '_checkbox']), 'ForegroundColor');
-        index = index+1;
-    end
-end
-
-function clearCheckboxes(hObject, eventdata, handles)
-% set checkbox names
-for loopIndex = 1:numel(handles.s_fieldnames)
-    set(eval(['handles.structure' num2str(loopIndex) '_checkbox']), 'Value', 0);
-    set(eval(['handles.structure' num2str(loopIndex) '_checkbox']), 'ForegroundColor', [0 0 0]);
-    set(eval(['handles.structure' num2str(loopIndex) '_checkbox']), 'BackgroundColor', [1 1 1]);
-end
-handles.selected_structures = handles.selected_structures * 0;
-guidata(hObject, handles);
-
-% --- Executes on button press in next_button.
-function next_button_Callback(hObject, eventdata, handles)
-% hObject    handle to next_button (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-guidata(hObject, handles);
-uiresume(gcbf);
-
-
-% --- Executes on selection change in analyze_popupmenu.
-function analyze_popupmenu_Callback(hObject, eventdata, handles)
-% hObject    handle to analyze_popupmenu (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: contents = cellstr(get(hObject,'String')) returns analyze_popupmenu contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from analyze_popupmenu
-
-
-% --- Executes during object creation, after setting all properties.
-function analyze_popupmenu_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to analyze_popupmenu (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: popupmenu controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-% --- Executes when selected object is changed in uipanel3.
-function uipanel3_SelectionChangeFcn(hObject, eventdata, handles)
-% hObject    handle to the selected object in uipanel3
-% eventdata  structure with the following fields (see UIBUTTONGROUP)
-%	EventName: string 'SelectionChanged' (read only)
-%	OldValue: handle of the previously selected object or empty if none was selected
-%	NewValue: handle of the currently selected object
-% handles    structure with handles and user data (see GUIDATA)
-%disp(get(get(handles.uipanel3,'SelectedObject'),'String'));
-
-
-
-% --- Executes on button press in reset_button.
-function reset_button_Callback(hObject, eventdata, handles)
-% hObject    handle to reset_button (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-OrigDlgH = ancestor(hObject, 'figure');
-delete(OrigDlgH);
-dicomtamer_start();
-
-
-% --- Executes on button press in calcFeatures.
-function calcFeatures_Callback(hObject, eventdata, handles)
-if get(handles.batch_tick, 'Value') == 0
-    % show the hourglass during computation
-    oldpointer = get(handles.figure1, 'pointer');
-    set(handles.figure1, 'pointer', 'watch')
-    drawnow;
-    
-    if isfield(handles, 'tps_data')
-        features = calculateFeatures(handles.tps_data);
-        writetable(features, fullfile(handles.output_directory, 'features.csv'),'Delimiter',';');
-    else
-        errordlg('Load tps.mat file first!','tps.mat error');
-    end
-    
-    set(handles.figure1, 'pointer', oldpointer);
-    drawnow;
-else
-    h = warndlg('DicomTamer will load features from xls files if found in patients'' directories. If you want to calculate all features from scratch, delete the xls files first!');
-    uiwait(h);
-    input_dir = uigetdir(handles.defaultdatapath, 'Choose Input Directory...');
-    showGUI = true;
-    recalcFeatures = false;
-    calcFeatures_batch( input_dir, recalcFeatures, showGUI);
-end
-
-
-
-% --- Executes on button press in select_all_button.
-function select_all_button_Callback(hObject, eventdata, handles)
-% hObject    handle to select_all_button (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% --- Executes on button press in select_none_button.
-function select_none_button_Callback(hObject, eventdata, handles)
-% hObject    handle to select_none_button (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% --- Executes on button press in newloader_button.
-function newloader_button_Callback(hObject, eventdata, handles)
-% hObject    handle to newloader_button (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-if get(handles.batch_tick, 'Value') == 0
-    hg_importDicomGUI
-else
-    hg_importDicomBatchGUI
-end
-
-
-% --- Executes on button press in batch_tick.
-function batch_tick_Callback(hObject, eventdata, handles)
-% hObject    handle to batch_tick (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hint: get(hObject,'Value') returns toggle state of batch_tick

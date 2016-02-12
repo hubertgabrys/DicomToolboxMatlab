@@ -34,7 +34,8 @@ cmax = ceil(max(cube(:))); % this finds maximum dose in the dosecube
 caxis(ax, [0,cmax]); % this sets limits of colors on a plot
 colormap(ax, jet(1024));
 if showScale
-    colorbar(ax, 'location','eastoutside');
+    %colorbar(ax, 'location','eastoutside');
+    colorbar('location','eastoutside');
 end
 if showLabels
     xlabel(ax, {'Transverse (y) axis'});
