@@ -2,7 +2,7 @@ function [cube, xVec, yVec, zVec] = hg_loadDoseCube(file_path)
 % The function takes a file path to RTDOSE dicom file and returns the dose
 % cube and cube grid vectors.
 %
-% the cube is in LPS coordinate system (Right->Left, Anterior->Posterior,
+% the cube is in LPS coordinate system (Anterior->Posterior, Right->Left,
 % Inferior->Superior)
 % http://www.itk.org/Wiki/images/thumb/f/f8/ImageOrientationStandard.png/800px-ImageOrientationStandard.png
 %

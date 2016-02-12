@@ -2,8 +2,8 @@ function [cube, xVec, yVec, zVec] = hg_loadCTCube(input_files_list)
 % The function takes a list (cell) of paths to CT dicom files and returns
 % the CT cube and cube grid vectors.
 % 
-% the cube is in LPS coordinate system (Right->Left, Anterior->Posterior,
-% Inferior->Superior) 
+% the cube is in LPS coordinate system (Anterior->Posterior, Right->Left,
+% Inferior->Superior)
 % http://www.itk.org/Wiki/images/thumb/f/f8/ImageOrientationStandard.png/800px-ImageOrientationStandard.png
 %
 % Hubert Gabrys <hubert.gabrys@gmail.com>, 2015-2016

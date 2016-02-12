@@ -1,6 +1,6 @@
 function slice = hg_plotct( tps_data, selected_structures, slice, contourcolor, ax )
 %
-% Hubert Gabrys <h.gabrys@dkfz.de>, 2014-15
+% Hubert Gabrys <h.gabrys@dkfz.de>, 2014-16
 % This file is licensed under GPLv2
 %
 
@@ -24,7 +24,7 @@ end
 %% plot dose
 axes(ax)
 showTitle = true;
-showLabels = false;
+showLabels = true;
 showScale = false;
 structure_zCoordinate = zVec(slice);
 [X, Y] = meshgrid(yVec, xVec);
@@ -37,8 +37,8 @@ if showScale
     colorbar(ax, 'location','eastoutside');
 end
 if showLabels
-    xlabel(ax, {'Transverse (y) axis'});
-    ylabel(ax, {'Sagittal (x) axis'});
+    xlabel(ax, {'2d: right -> left'});
+    ylabel(ax, {'1d: posterior <- anterior'});
 end
 axis(ax, [min(yVec) max(yVec) min(xVec) max(xVec)])
 view(ax, 0,-90)

@@ -1,5 +1,8 @@
 function tps_data = hg_dicomimport( varargin )
-% 
+%
+% the cube is in LPS coordinate system (Anterior->Posterior, Right->Left,
+% Inferior->Superior) 
+%
 % Hubert Gabrys <hubert.gabrys@gmail.com>, 2015-2016
 % This file is licensed under GPLv2
 %
