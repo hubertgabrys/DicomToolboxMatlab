@@ -49,3 +49,4 @@ switch inv
         % Calculate moments
         m = hg_calcmom3d(V,p,q,r,'transinv',x1spac, x2spac, x3spac)/norm;
 end
+end

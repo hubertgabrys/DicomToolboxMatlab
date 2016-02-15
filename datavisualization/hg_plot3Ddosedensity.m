@@ -2,7 +2,7 @@ function hg_plot3Ddosedensity( cube, xVec, yVec, zVec, ax )
 
 [V, x1gv, x2gv, x3gv] = hg_cropcube(cube, xVec, yVec, zVec, 'zero');
 
-[ Vi, x1gvi, x2gvi, x3gvi ] = hg_interpcube( V, x1gv, x2gv, x3gv, 2.5, 'linear');
+[ Vi, x1gvi, x2gvi, x3gvi ] = hg_interpcube( V, x1gv, x2gv, x3gv, 1, 'linear');
 
 maxdim = max(size(Vi));
 xpad = round((maxdim-length(x1gvi))/2);
