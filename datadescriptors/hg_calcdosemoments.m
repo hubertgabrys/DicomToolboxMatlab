@@ -13,7 +13,7 @@ function output = hg_calcdosemoments(struct_dc, mom_def)
 % This file is licensed under GPLv2
 %
 
-interp_interval = 2.5; % it shouldn't be hardcoded. What's more it should be 
+interp_interval = 1; % it shouldn't be hardcoded. What's more it should be 
 % the same value as in the hg_loadcube function. Maybe it's better to get rid 
 % of this interpolation in moment's calculation...
 
