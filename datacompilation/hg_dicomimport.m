@@ -47,9 +47,9 @@ if ct_exists
     xVec_new = (xVec_ct(1):resolution:xVec_ct(end))';
     yVec_new = (yVec_ct(1):resolution:yVec_ct(end))';
     zVec_new = (zVec_ct(1):resolution:zVec_ct(end))';
-    [x, y, z] = ndgrid(xVec_ct,yVec_ct,zVec_ct);
-    [xi, yi, zi] = ndgrid(xVec_new,yVec_new,zVec_new);
-    cube_ct_new = interpn(x,y,z,double(cube_ct),xi,yi,zi);
+    [x, y, z] = meshgrid(xVec_ct,yVec_ct,zVec_ct);
+    [xi, yi, zi] = meshgrid(xVec_new,yVec_new,zVec_new);
+    cube_ct_new = interp3(x,y,z,double(cube_ct),xi,yi,zi);
     clear x y z xi yi zi;
     tps_data.ct.cube = cube_ct_new;
     tps_data.ct.xVec = xVec_new;
@@ -65,9 +65,9 @@ if size(rtdose_path,1) == 1
         yVec_new = (yVec_d(1):resolution:yVec_d(end))';
         zVec_new = (zVec_d(1):resolution:zVec_d(end))';
     end
-    [x, y, z] = ndgrid(xVec_d,yVec_d,zVec_d);
-    [xi, yi, zi] = ndgrid(xVec_new,yVec_new,zVec_new);
-    cube_d_new = interpn(x,y,z,cube_d,xi,yi,zi);
+    [x, y, z] = meshgrid(xVec_d,yVec_d,zVec_d);
+    [xi, yi, zi] = meshgrid(xVec_new,yVec_new,zVec_new);
+    cube_d_new = interp3(x,y,z,cube_d,xi,yi,zi);
     cube_d_new(isnan(cube_d_new)) = 0;
     clear x y z xi yi zi;
     tps_data.dose.cube = cube_d_new;
@@ -75,7 +75,7 @@ if size(rtdose_path,1) == 1
     tps_data.dose.yVec = yVec_new;
     tps_data.dose.zVec = zVec_new;
 elseif size(rtdose_path,1) == 2 && ct_exists
-    error('not implemented yet!');
+    error('not supported!');
 elseif size(rtdose_path,1) == 2 && ~ct_exists
     [cube1_d, xVec1_d, yVec1_d, zVec1_d] = hg_loadDoseCube(rtdose_path{1});
     [cube2_d, xVec2_d, yVec2_d, zVec2_d] = hg_loadDoseCube(rtdose_path{2});
@@ -89,13 +89,13 @@ elseif size(rtdose_path,1) == 2 && ~ct_exists
         yVec_new = (yVec2_d(1):resolution:yVec2_d(end))';
         zVec_new = (zVec2_d(1):resolution:zVec2_d(end))';
     end
-    [x, y, z] = ndgrid(xVec1_d,yVec1_d,zVec1_d);
-    [xi, yi, zi] = ndgrid(xVec_new,yVec_new,zVec_new);
-    cube1_d_new = interpn(x,y,z,cube1_d,xi,yi,zi);
+    [x, y, z] = meshgrid(xVec1_d,yVec1_d,zVec1_d);
+    [xi, yi, zi] = meshgrid(xVec_new,yVec_new,zVec_new);
+    cube1_d_new = interp3(x,y,z,cube1_d,xi,yi,zi);
     cube1_d_new(isnan(cube1_d_new)) = 0;
     clear x y z;
-    [x, y, z] = ndgrid(xVec2_d,yVec2_d,zVec2_d);
-    cube2_d_new = interpn(x,y,z,cube2_d,xi,yi,zi);
+    [x, y, z] = meshgrid(xVec2_d,yVec2_d,zVec2_d);
+    cube2_d_new = interp3(x,y,z,cube2_d,xi,yi,zi);
     cube2_d_new(isnan(cube2_d_new)) = 0;
     clear x y z xi yi zi;
     tps_data.dose.cube = cube1_d_new+cube2_d_new;
@@ -109,16 +109,6 @@ elseif size(rtdose_path,1) > 2
             [cube_d(:,:,i), xVec_d, yVec_d, zVec_d(i,1)] = hg_loadDoseCube(rtdose_path{i});
         end
     elseif dimensions == 3
-        %         for i=1:length(rtdose_path)
-        %             try
-        %             [cube_d(:,:,:,i), xVec_d, yVec_d, zVec_d] = hg_loadDoseCube(rtdose_path{i});
-        %             catch
-        %                 fprintf('Check dimensionmismatch!\n');
-        %                 continue;
-        %             end
-        %             %[cube_d{i,1}, xVec_d, yVec_d, zVec_d] = hg_loadDoseCube(rtdose_path{i});
-        %         end
-        %         cube_d = sum(cube_d,4);
         error('More than 2 RTDOSE dicoms not supported!');
     end
     if zVec_d(2) - zVec_d(1) < 0 % Flip cube if zVec is descending
@@ -130,9 +120,9 @@ elseif size(rtdose_path,1) > 2
         yVec_new = (yVec_d(1):resolution:yVec_d(end))';
         zVec_new = (zVec_d(1):resolution:zVec_d(end))';
     end
-    [x, y, z] = ndgrid(xVec_d,yVec_d,zVec_d);
-    [xi, yi, zi] = ndgrid(xVec_new,yVec_new,zVec_new);
-    cube_d_new = interpn(x,y,z,cube_d,xi,yi,zi);
+    [x, y, z] = meshgrid(xVec_d,yVec_d,zVec_d);
+    [xi, yi, zi] = meshgrid(xVec_new,yVec_new,zVec_new);
+    cube_d_new = interp3(x,y,z,cube_d,xi,yi,zi);
     cube_d_new(isnan(cube_d_new)) = 0;
     clear x y z xi yi zi;
     tps_data.dose.cube = cube_d_new;
@@ -157,6 +147,5 @@ if save_matfile
             save([PathName, FileName],'tps_data', '-v7.3');
         end
     end
-    %fprintf('All structures calculated and saved to tps_data.mat\n\n');
 end
 end

@@ -27,7 +27,7 @@ showTitle = true;
 showLabels = false;
 showScale = true;
 structure_zCoordinate = zVec(slice);
-[X, Y] = meshgrid(yVec, xVec);
+[X, Y] = meshgrid(xVec, yVec);
 Z = cube(:,:,slice);
 surf(X, Y, Z, 'LineStyle', 'none');
 cmax = ceil(max(cube(:))); % this finds maximum dose in the dosecube
@@ -41,7 +41,7 @@ if showLabels
     xlabel(ax, {'Transverse (y) axis'});
     ylabel(ax, {'Sagittal (x) axis'});
 end
-axis(ax, [min(yVec) max(yVec) min(xVec) max(xVec)])
+axis(ax, [min(xVec) max(xVec) min(yVec) max(yVec)])
 view(ax, 0,-90)
 if showTitle
     title(ax, {['Z coordinate: ' num2str(structure_zCoordinate)], ['Slice: ' num2str(slice)]});
@@ -56,8 +56,8 @@ if ~isempty(selected_structures)
         B = bwboundaries(bwperim(structure.indicator_mask(:,:,slice)),'noholes');
         for j=1:size(B,1)
             poly = B{j};
-            structure_xCoordinates = (poly(:,2)-1)*(yVec(2)-yVec(1))+yVec(1);
-            structure_yCoordinates = (poly(:,1)-1)*(xVec(2)-xVec(1))+xVec(1);
+            structure_xCoordinates = (poly(:,2)-1)*(xVec(2)-xVec(1))+xVec(1);
+            structure_yCoordinates = (poly(:,1)-1)*(yVec(2)-yVec(1))+yVec(1);
             plot(ax, structure_xCoordinates,structure_yCoordinates, 'LineWidth', 2, 'Color', contourcolor(i,:));
         end
         % plot original countours <- DO NOT DELETE THIS!

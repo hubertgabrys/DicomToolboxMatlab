@@ -22,7 +22,6 @@ for j = 1:length(list_of_contoured_strucs) % for every contoured structure
     if nnz(ismember(struct2skip, struct_name)) % don't calculate structures defined in struct2skip
         continue;
     end
-    %disp(struct_name)
     list_of_slices = fieldnames(dicom_info.ROIContourSequence.(list_of_contoured_strucs{j}).ContourSequence);
     %i = 0;
     %zCoords = zeros(length(list_of_slices),1);
@@ -35,9 +34,7 @@ for j = 1:length(list_of_contoured_strucs) % for every contoured structure
             temp_struct_mask{k,1} = zCoord;
             temp_struct_mask{k,2} = slice_mask;
             temp_struct_mask{k,3} = slice_vetrices;
-            
-            
-            
+
 %             if k == 1
 %                 struct_vetrices = slice_vetrices;
 %             else
@@ -60,7 +57,7 @@ for j = 1:length(list_of_contoured_strucs) % for every contoured structure
     for ii=1:length(struct_zVec) %for each slice
         slice_masks = temp_struct_mask(cell2mat(temp_struct_mask(:,1)) == struct_zVec(ii),2);
         slice_vetrices = temp_struct_mask(cell2mat(temp_struct_mask(:,1)) == struct_zVec(ii),3);
-        for jj=1:size(slice_masks,1) % there may multiple struct definintions on one slice
+        for jj=1:size(slice_masks,1) % there may be multiple struct definintions on one slice
             if jj == 1
                 struct_mask(:,:,ii) = cell2mat(slice_masks(jj,1));
                 struct_vetrices = cell2mat(slice_vetrices(jj,1));
@@ -79,15 +76,15 @@ for j = 1:length(list_of_contoured_strucs) % for every contoured structure
         % interpolate structure mask to cube
         %struct_zVec = unique(struct_vetrices(:,3));
         if length(struct_zVec) > 1
-            [x, y, z] = ndgrid(xVec,yVec,struct_zVec); % existing data
-            [xi, yi, zi] = ndgrid(xVec,yVec,zVec); % including new slice
+            [x, y, z] = meshgrid(xVec,yVec,struct_zVec); % existing data
+            [xi, yi, zi] = meshgrid(xVec,yVec,zVec); % including new slice
             imdist = @(x) -bwdist(bwperim(x)).*~x + bwdist(bwperim(x)).*x;
             struct_mask = +struct_mask;
             struct_mask_dist = zeros(0);
             for m = 1:size(struct_mask,3)
                 struct_mask_dist(:,:,m) = imdist(struct_mask(:,:,m));
             end
-            struct_mask_i = interpn(x,y,z,struct_mask_dist,xi,yi,zi);
+            struct_mask_i = interp3(x,y,z,struct_mask_dist,xi,yi,zi);
             clear x y z struct_mask_dist xi yi zi struct_mask
             struct_mask_i = struct_mask_i>=0;
             
@@ -98,7 +95,7 @@ for j = 1:length(list_of_contoured_strucs) % for every contoured structure
                 end
             end
             if noofnonzeroslices < 2 % number of nonzero slices
-                disp('Single slice structure skipped!'); % Fix it!
+                % disp('Single slice structure skipped!'); % Fix it!
                 continue;
             end
 %             emptyplanes = false;
@@ -116,7 +113,7 @@ for j = 1:length(list_of_contoured_strucs) % for every contoured structure
             structures.(struct_name).structure_vetrices = struct_vetrices;
             clear struct_mask_i struct_vetrices;
         else
-            disp('Single slice structure skipped!'); % Fix it!
+            % disp('Single slice structure skipped!'); % Fix it!
         end
     end
 end
@@ -137,14 +134,14 @@ for k = 1:length(list_of_defined_struc)
 end
 %struc_name = dicom_struc_info.StructureSetROISequence.(...
 %    list_of_defined_struc{roinumber}).ROIName;
-% change nonalphanumeric chars to underscore
+% change nonalphanumeric characters to underscore
 struc_name(~isstrprop(struc_name, 'alphanum')) = '_';
 struc_name = regexprep(struc_name,'[^a-zA-Z0-9]','_');
 while strcmp(struc_name(end),'_')
     struc_name(end) = '';
 end
-% change all chars to uppercase
-struc_name = upper(struc_name);
+% change all characters to lowercase
+struc_name = lower(struc_name);
 
 function [slice_mask, slice_vetrices, zCoord] = calcSliceMask(slice, xVec, yVec)
 zCoord = slice.ContourData(3);
@@ -162,6 +159,6 @@ end
 xCoord = [xCoord; xCoord(1)]; % close the contour
 yCoord = [yCoord; yCoord(1)]; % close the contour
 slice_vetrices = [xCoord, yCoord, ones(length(xCoord),1)*zCoord];
-[X, Y] = meshgrid(yVec, xVec);
+[X, Y] = meshgrid(xVec, yVec);
 slice_mask = inpolygon(X, Y, xCoord, yCoord);
 

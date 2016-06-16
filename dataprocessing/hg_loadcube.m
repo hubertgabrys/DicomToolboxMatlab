@@ -1,4 +1,4 @@
-function [struct_cube, struct_x1gv, struct_x2gv, struct_x3gv] = hg_loadcube( tps_data, strucname, cube_type )
+function [struct_cube, struct_xgv, struct_ygv, struct_zgv] = hg_loadcube( tps_data, strucname, cube_type )
 
 
 %% Parameters
@@ -17,31 +17,31 @@ if strcmp(cube_type,'dose')
 elseif strcmp(cube_type,'ct')
     struct_cube = cube .* indmsk;
 end
-x1gv = tps_data.(cube_type).xVec;
-x2gv = tps_data.(cube_type).yVec;
-x3gv = tps_data.(cube_type).zVec;
+xgv = tps_data.(cube_type).xVec;
+ygv = tps_data.(cube_type).yVec;
+zgv = tps_data.(cube_type).zVec;
 
 % %% Interpolate cube
 % if interpolate
-%     [struct_cube, struct_x1gv, struct_x2gv, struct_x3gv] = hg_interpcube(...
-%         struct_cube, x1gv, x2gv, x3gv, interp_interval, interp_method);
+%     [struct_cube, struct_xgv, struct_ygv, struct_zgv] = hg_interpcube(...
+%         struct_cube, xgv, ygv, zgv, interp_interval, interp_method);
 %     disp('dosecube interpolated');
 % end
 % 
 % %% Crop cube
 % if crop
-%     [struct_cube, struct_x1gv, struct_x2gv, struct_x3gv] = hg_cropcube(...
-%         struct_cube, struct_x1gv, struct_x2gv, struct_x3gv, crop_shift);
+%     [struct_cube, struct_xgv, struct_ygv, struct_zgv] = hg_cropcube(...
+%         struct_cube, struct_xgv, struct_ygv, struct_zgv, crop_shift);
 % end
 
 %% Crop cube
 if crop
-    [struct_cube, struct_x1gv, struct_x2gv, struct_x3gv] = hg_cropcube(...
-        struct_cube, x1gv, x2gv, x3gv, crop_shift);
+    [struct_cube, struct_xgv, struct_ygv, struct_zgv] = hg_cropcube(...
+        struct_cube, xgv, ygv, zgv, crop_shift);
 end
 
 % %% Remove planes within the structure cube where strucutre contour is not defined
-% for k=1:length(struct_x3gv)
+% for k=1:length(struct_zgv)
 %     if ~sum(sum(struct_cube(:,:,k)))
 %         error('Remove planes within the structure dosecube where strucutre contour is not defined!');
 %     end

@@ -10,17 +10,17 @@ z2 = permute(struct_cube, [2,1,3]);
 z1_v = nonzeros(z1);
 z2_v = nonzeros(z2);
 
-y1 = permute(struct_cube, [1,3,2]);
-y2 = permute(struct_cube, [3,1,2]);
-
-y1_v = nonzeros(y1);
-y2_v = nonzeros(y2);
-
-x1 = permute(struct_cube, [2,3,1]);
-x2 = permute(struct_cube, [3,2,1]);
+x1 = permute(struct_cube, [1,3,2]);
+x2 = permute(struct_cube, [3,1,2]);
 
 x1_v = nonzeros(x1);
 x2_v = nonzeros(x2);
+
+y1 = permute(struct_cube, [2,3,1]);
+y2 = permute(struct_cube, [3,2,1]);
+
+y1_v = nonzeros(y1);
+y2_v = nonzeros(y2);
 
 for i=1:resolution
     subvol_mean1.(['subvol_x',num2str(i),'of',num2str(resolution)]) = mean(x1_v((i-1)*n+1:i*n));

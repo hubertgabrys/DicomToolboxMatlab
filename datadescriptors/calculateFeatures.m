@@ -1,81 +1,66 @@
-function output = calculateFeatures( tps_data )
+function output = calculateFeatures( tps_data, verbose )
 %calculateFeatures calls various functions to calculate dosimetric and ct
-%descriptors of the structures.
-%   tps_data - ct, dosimetric, and structure data from treatment planning system
-%   strucnames - names of structures
+%descriptors of the rt structures.
+%   tps_data - ct, dosimetric, and structure data from the tps
+%   strucnames - names of rt structures
 
+if nargin < 2
+	verbose = 1;
+end
 
+dose_cube = tps_data.dose.cube;
+xspac = tps_data.dose.xVec(2)-tps_data.dose.xVec(1);
+yspac = tps_data.dose.yVec(2)-tps_data.dose.yVec(1);
+zspac = tps_data.dose.zVec(2)-tps_data.dose.zVec(1);
 strucnames = fieldnames(tps_data.structures);
-
-%fprintf('Calculating features...\n');
 for i=1:length(strucnames)
     strucname = strucnames{i};
-    disp(strucname);    
-    %% DOSIMETRIC
-    struct_cube = hg_loadcube(tps_data, strucname, 'dose' );
-    % this part requires revision. it will be better to have separate
-    % functions for different dosimetric descripotors. The functions will
-    % get binary 3-dimensional structures as input eg:
-    % dvh = hg_calcdvh(struct_cube);
-    % min = hg_calc???(struct_cube, 'min');
-    % mean = hg_calc???(struct_cube, 'mean');
-    % max = hg_calc???(struct_cube, 'max');
-    % moments = hg_calcmoments(struct_cube, mom_def);
+	if verbose
+		progress_tool(i, length(strucnames));
+	end
     
-    % dose-volume
+    % load structure dosecube
+    struct_cube = hg_loadcube(tps_data, strucname, 'dose' );
+    struct_cube_msk = struct_cube>0;
+    struct_indicator_msk = tps_data.structures.(strucname).indicator_mask;
+    
+    % dose-volume features
     dvh = hg_calcdvh(struct_cube);
     dvh = dvh.array;
     
-%     % subvolumes
-%     resolution = 2;
-%     subvolumes1 = hg_calcStructSubvolumes(struct_cube, resolution);
-%     resolution = 3;
-%     subvolumes2 = hg_calcStructSubvolumes(struct_cube, resolution);
+    % subvolume features
+    resolution = 2;
+    subvol2 = hg_calcStructSubvolumes(struct_cube, resolution);
+    resolution = 3;
+    subvol3 = hg_calcStructSubvolumes(struct_cube, resolution);
     
-    % spatial moments
-    %struct_cube = hg_loadcube(tps_data, strucname, 'dose', true );
+    % 3D moments
     mom_def = [1 1 0; 1 0 1; 0 1 1; 2 0 0; 0 2 0; 0 0 2;...
         1 1 1; 2 1 0; 2 0 1; 1 2 0; 0 2 1; 0 1 2; 1 0 2;...
-        3 0 0; 0 3 0; 0 0 3; 4 0 0; 0 4 0; 0 0 4; 3 1 0; 3 0 1; 1 3 0; 0 3 1; 1 0 3; 0 1 3; 2 2 2];
-    %mom_def = npermutek(0:4,3);
+        3 0 0; 0 3 0; 0 0 3; 4 0 0; 0 4 0; 0 0 4; 3 1 0;...
+        3 0 1; 1 3 0; 0 3 1; 1 0 3; 0 1 3; 2 2 2];
     moments = hg_calcdosemoments(struct_cube, mom_def);
     
-    % merge results
-    if exist('dosimetric_features', 'var')
-        dosimetric_features = [dosimetric_features; [dvh, moments]];
-    else
-        dosimetric_features = [dvh, moments];
-    end
-    
-    %struct_cube = hg_loadcube(tps_data, strucname, 'ct', false );
-    struct_cube_mask = struct_cube>0;
-    xspacing = tps_data.dose.xVec(2)-tps_data.dose.xVec(1);
-    yspacing = tps_data.dose.yVec(2)-tps_data.dose.yVec(1);
-    zspacing = tps_data.dose.zVec(2)-tps_data.dose.zVec(1);
-%     xspacing = 1;
-%     yspacing = 1;
-%     zspacing = 1;
+    % 3D gradients
+    gradients = hg_calcdosegradients(dose_cube, xspac, yspac, zspac, struct_indicator_msk);
     
     % Area
-    struc_area = calcStrucArea(struct_cube_mask, xspacing, yspacing, zspacing);
+    struc_area = calcStrucArea(struct_cube_msk, xspac, yspac, zspac);
     
-    % Volume 3D
-    struc_volume = calcStrucVolume(struct_cube_mask, xspacing, yspacing, zspacing);
+    % 3D Volume
+    struc_vol = calcStrucVolume(struct_cube_msk, xspac, yspac, zspac);
     
     % Eccentricity
-    struc_eccentricity = calcStrucEccentricity(struct_cube_mask, xspacing, yspacing, zspacing);    
+    struc_ecc = calcStrucEccentricity(struct_cube_msk, xspac, yspac, zspac);    
     
     % Compactness
-    struc_compactness = hg_calcStructCompactness(struct_cube_mask, xspacing, yspacing, zspacing);    
+    struc_comp = hg_calcStructCompactness(struct_cube_msk, xspac, yspac, zspac);    
     
     % Density
-    struc_density = hg_calcStructDensity(struct_cube_mask, xspacing, yspacing, zspacing);    
-    
-    % Roundness
-    
+    struc_dens= hg_calcStructDensity(struct_cube_msk, xspac, yspac, zspac);      
     
     % Sphericity
-    struc_sphericity = hg_calcStructSphericity(struct_cube_mask, xspacing, yspacing, zspacing);
+    struc_spher = hg_calcStructSphericity(struct_cube_msk, xspac, yspac, zspac);
     
     % Isotropy indices
     %struc_isotropyIndices = hg_calcStructIsotropyInd(struct_cube_mask, xspacing, yspacing, zspacing);
@@ -83,23 +68,33 @@ for i=1:length(strucnames)
     % Aspect ratios
     %struc_aspectRatios = hg_calcStructAspRatios(struct_cube_mask, xspacing, yspacing, zspacing);
     
-    % merge results
+    % concatenate shape features
     variablenames = {'area', 'volume', 'eccentricity', 'compactness', 'density', 'sphericity'};
-    if exist('shape_features', 'var')
-        shape_features = [shape_features; table(struc_area, struc_volume, struc_eccentricity, struc_compactness, ...
-            struc_density, struc_sphericity, 'VariableNames', variablenames)];
+    shape_features = table(struc_area, struc_vol, struc_ecc, struc_comp, struc_dens, struc_spher, 'VariableNames', variablenames);
+        
+    % merge the results
+    this_final_features = [dvh, subvol2, subvol3, moments, gradients, shape_features];
+    if ~exist('final_features', 'var')
+        final_features = this_final_features;
     else
-        shape_features = table(struc_area, struc_volume, struc_eccentricity, struc_compactness,...
-            struc_density, struc_sphericity, 'VariableNames', variablenames);
-    end
-    
-    
-    %fprintf('Features for %s calculated.\n', strucname);
+        final_features = [final_features; this_final_features];
+    end    
 end
-%fprintf('Features for all structures calculated!\n\n');
+if verbose
+	fprintf(repmat('\b',1,7)); % erase progress_tool output
+end
 
 %% output
 strucnames = table(strucnames, 'VariableNames', {'structure'});
-output = [strucnames, dosimetric_features, shape_features];
+output = [strucnames, final_features];
 
+end
+
+
+function progress_tool(currentIndex, totalNumberOfEvaluations)
+if (currentIndex > 1 && nargin < 3)
+  Length = numel(sprintf('%3.2f%%',(currentIndex-1)/totalNumberOfEvaluations*100));
+  fprintf(repmat('\b',1,Length));
+end
+fprintf('%3.2f%%',currentIndex/totalNumberOfEvaluations*100);
 end

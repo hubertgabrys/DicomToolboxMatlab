@@ -13,14 +13,14 @@ end
 switch inv
     case 'raw'
         % Define grid
-        X1 = ndgrid(0:length(V)-1);
+        X1 = meshgrid(0:length(V)-1);
         % Calculate
         Vq = (X1.^n(1)).*V;
         m = sum(Vq(:));
         
     case 'trans'
         % Define grid
-        X1 = ndgrid(0:length(V)-1);
+        X1 = meshgrid(0:length(V)-1);
         % Calculate mean values
         x1bar2 = hg_calcmom1d(V,1,'raw')/hg_calcmom1d(V,0,'raw');
         % Calculate moments

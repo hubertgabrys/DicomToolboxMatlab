@@ -21,7 +21,7 @@ if ischar(input_dir) % in case the user choose cancel
             %fprintf('Features loaded from csv file!\n');
         else
             load(fullfile(input_dir, dirnames{i},'tps_data'));
-            features = calculateFeatures(tps_data);
+            features = calculateFeatures(tps_data, 0);
             writetable(features, path, 'Delimiter', ';');
         end
         

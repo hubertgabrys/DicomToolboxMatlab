@@ -12,7 +12,7 @@ for j=1:size(V,1)
         no_vox = no_vox+tmp_area;
     end
 end
-area_x = no_vox*yspac*zspac;
+area_y = no_vox*xspac*zspac;
 for j=1:size(V,2)
     if j==1
         no_vox = sum(sum(V(:,j,:)));
@@ -25,7 +25,7 @@ for j=1:size(V,2)
         no_vox = no_vox+tmp_area;
     end
 end
-area_y = no_vox*xspac*zspac;
+area_x = no_vox*yspac*zspac;
 for j=1:size(V,3)
     if j==1
         no_vox = sum(sum(V(:,:,j)));

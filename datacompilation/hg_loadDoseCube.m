@@ -38,22 +38,21 @@ elseif ismatrix(cube_o)
     zVec = dicom_info.ImagePositionPatient(3);
 end
 
-
 if dicom_info.ImageOrientationPatient(1) == 1 && dicom_info.ImageOrientationPatient(2) == 0 && dicom_info.ImageOrientationPatient(3) == 0
-    xVec = dicom_info.ImagePositionPatient(2) + (0:double(dicom_info.Rows-1))' * dicom_info.PixelSpacing(2);
+    yVec = dicom_info.ImagePositionPatient(2) + (0:double(dicom_info.Rows-1))' * dicom_info.PixelSpacing(2);
 elseif dicom_info.ImageOrientationPatient(1) == -1 && dicom_info.ImageOrientationPatient(2) == 0 && dicom_info.ImageOrientationPatient(3) == 0
-    xVec = dicom_info.ImagePositionPatient(2) - (0:double(dicom_info.Rows-1))' * dicom_info.PixelSpacing(2);
-    xVec = sort(xVec);
+    yVec = dicom_info.ImagePositionPatient(2) - (0:double(dicom_info.Rows-1))' * dicom_info.PixelSpacing(2);
+    yVec = sort(yVec);
     cube = flip(cube,1);
 else
     error('Not supported patient''s orientation');
 end
 
 if dicom_info.ImageOrientationPatient(4) == 0 && dicom_info.ImageOrientationPatient(5) == 1 && dicom_info.ImageOrientationPatient(6) == 0
-    yVec = dicom_info.ImagePositionPatient(1) + (0:double(dicom_info.Columns-1))' * dicom_info.PixelSpacing(1);
+    xVec = dicom_info.ImagePositionPatient(1) + (0:double(dicom_info.Columns-1))' * dicom_info.PixelSpacing(1);
 elseif dicom_info.ImageOrientationPatient(4) == 0 && dicom_info.ImageOrientationPatient(5) == -1 && dicom_info.ImageOrientationPatient(6) == 0
-    yVec = dicom_info.ImagePositionPatient(1) - (0:double(dicom_info.Columns-1))' * dicom_info.PixelSpacing(1);
-    yVec = sort(yVec);
+    xVec = dicom_info.ImagePositionPatient(1) - (0:double(dicom_info.Columns-1))' * dicom_info.PixelSpacing(1);
+    xVec = sort(xVec);
     cube = flip(cube,2);
 else
     error('Not supported patient''s orientation');
