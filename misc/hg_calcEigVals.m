@@ -4,12 +4,12 @@ function [ eigvals, covmat ] = hg_calcEigVals( struct_cube_mask, xspacing, yspac
 % This file is licensed under GPLv2
 %
 
-mu_200 = hg_calcmom3d(struct_cube_mask,2,0,0,'scaleinv', xspacing, yspacing, zspacing);
-mu_020 = hg_calcmom3d(struct_cube_mask,0,2,0,'scaleinv', xspacing, yspacing, zspacing);
-mu_002 = hg_calcmom3d(struct_cube_mask,0,0,2,'scaleinv', xspacing, yspacing, zspacing);
-mu_110 = hg_calcmom3d(struct_cube_mask,1,1,0,'scaleinv', xspacing, yspacing, zspacing);
-mu_101 = hg_calcmom3d(struct_cube_mask,1,0,1,'scaleinv', xspacing, yspacing, zspacing);
-mu_011 = hg_calcmom3d(struct_cube_mask,0,1,1,'scaleinv', xspacing, yspacing, zspacing);
+mu_200 = hg_calcmom3d(struct_cube_mask,2,0,0,'transinv', xspacing, yspacing, zspacing);
+mu_020 = hg_calcmom3d(struct_cube_mask,0,2,0,'transinv', xspacing, yspacing, zspacing);
+mu_002 = hg_calcmom3d(struct_cube_mask,0,0,2,'transinv', xspacing, yspacing, zspacing);
+mu_110 = hg_calcmom3d(struct_cube_mask,1,1,0,'transinv', xspacing, yspacing, zspacing);
+mu_101 = hg_calcmom3d(struct_cube_mask,1,0,1,'transinv', xspacing, yspacing, zspacing);
+mu_011 = hg_calcmom3d(struct_cube_mask,0,1,1,'transinv', xspacing, yspacing, zspacing);
 
 covmat(1,1) = mu_200;
 covmat(1,2) = mu_110;
