@@ -32,8 +32,10 @@ end
 %% output
 variablenames = strrep(num2cell(num2str(mom_def),2), ' ', '')';
 variablenames = cellfun(@(v) ['m' v], variablenames, 'Uniform', 0);
-output = array2table(mom_val, 'VariableNames', variablenames);
-%t2 = array2table({'ipsi' 'left'; 'contra' 'right'; 'ipsi' 'right'; 'contra' 'left'}, 'VariableNames', {'lateral' 'side'});
-%output = [t2 t1];
+
+for i=1:length(variablenames)
+  output.(variablenames{i}) = mom_val(i);  
+end
+
 %disp('Moments calculated');
 end

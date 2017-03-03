@@ -13,9 +13,9 @@ indmsk = tps_data.structures.(strucname).indicator_mask;
 % to 0.00001 (or any small value)
 cube(cube == 0 & indmsk == 1) = 0.00001;
 if strcmp(cube_type,'dose')
-    struct_cube = cube .* indmsk;
+    struct_cube = cube .* double(indmsk);
 elseif strcmp(cube_type,'ct')
-    struct_cube = cube .* indmsk;
+    struct_cube = cube .* double(indmsk);
 end
 xgv = tps_data.(cube_type).xVec;
 ygv = tps_data.(cube_type).yVec;

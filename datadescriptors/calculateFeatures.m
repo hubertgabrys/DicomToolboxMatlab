@@ -26,7 +26,6 @@ for i=1:length(strucnames)
     
     % dose-volume features
     dvh = hg_calcdvh(struct_cube);
-    dvh = dvh.array;
     
     % subvolume features
     resolution = 2;
@@ -44,49 +43,34 @@ for i=1:length(strucnames)
     % 3D gradients
     gradients = hg_calcdosegradients(dose_cube, xspac, yspac, zspac, struct_indicator_msk);
     
-    % Area
-    struc_area = calcStrucArea(struct_cube_msk, xspac, yspac, zspac);
+    % Shape features
+    shape_features = calc_shape_features(struct_cube_msk, xspac, yspac, zspac);
     
-    % 3D Volume
-    struc_vol = calcStrucVolume(struct_cube_msk, xspac, yspac, zspac);
+    % Histogram features
+    histogram_features = calc_hist_features(dose_cube, struct_indicator_msk);
     
-    % Eccentricity
-    struc_ecc = calcStrucEccentricity(struct_cube_msk, xspac, yspac, zspac);    
-    
-    % Compactness
-    struc_comp = hg_calcStructCompactness(struct_cube_msk, xspac, yspac, zspac);    
-    
-    % Density
-    struc_dens= hg_calcStructDensity(struct_cube_msk, xspac, yspac, zspac);      
-    
-    % Sphericity
-    struc_spher = hg_calcStructSphericity(struct_cube_msk, xspac, yspac, zspac);
-    
-    % Isotropy indices
-    %struc_isotropyIndices = hg_calcStructIsotropyInd(struct_cube_mask, xspacing, yspacing, zspacing);
-    
-    % Aspect ratios
-    %struc_aspectRatios = hg_calcStructAspRatios(struct_cube_mask, xspacing, yspacing, zspacing);
-    
-    % concatenate shape features
-    variablenames = {'area', 'volume', 'eccentricity', 'compactness', 'density', 'sphericity'};
-    shape_features = table(struc_area, struc_vol, struc_ecc, struc_comp, struc_dens, struc_spher, 'VariableNames', variablenames);
-        
     % merge the results
-    this_final_features = [dvh, subvol2, subvol3, moments, gradients, shape_features];
+    feature_names = ['strucname'; fieldnames(histogram_features);...
+        fieldnames(dvh); fieldnames(subvol2); fieldnames(subvol3);...
+        fieldnames(gradients); fieldnames(moments);...
+        fieldnames(shape_features)]';
+    this_final_features = [strucname; struct2cell(histogram_features);...
+        struct2cell(dvh); struct2cell(subvol2); struct2cell(subvol3);...
+        struct2cell(gradients); struct2cell(moments);...
+        struct2cell(shape_features)]';
+ 
     if ~exist('final_features', 'var')
-        final_features = this_final_features;
+        final_features = [feature_names; this_final_features];
     else
         final_features = [final_features; this_final_features];
-    end    
+    end
 end
 if verbose
 	fprintf(repmat('\b',1,7)); % erase progress_tool output
 end
 
 %% output
-strucnames = table(strucnames, 'VariableNames', {'structure'});
-output = [strucnames, final_features];
+output = final_features;
 
 end
 

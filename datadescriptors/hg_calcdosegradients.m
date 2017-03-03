@@ -10,5 +10,5 @@ gradients.gradx = sum(sgx(:))/nnz(sgx(:));
 gradients.grady = sum(sgy(:))/nnz(sgy(:));
 gradients.gradz = sum(sgz(:))/nnz(sgz(:));
 
-gradients = struct2table(gradients);
+% gradients = struct2table(gradients);
 end

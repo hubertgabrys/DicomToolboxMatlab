@@ -1,4 +1,4 @@
-function output = hg_calcdvh(struct_cube)
+function dvh = hg_calcdvh(struct_cube)
 % tps_data - structure obtainable from hg_dicomimport function
 % strucname - string representing name of the structure for which dvh is to be calculated
 % output - a table containing misc parameters (mean, max, min, median dose etc.)
@@ -68,17 +68,25 @@ output.vals = volume_relative;
 clear tmp;
 
 %% prepare output
-%t1 = array2table({strucname}, 'VariableNames', {'structure'});
-t2 = array2table([noVox, d_min, d_max, d_mean], 'VariableNames', {'no_voxels', 'min', 'max', 'mean'});
 for k=1:99
     d_labels{k} = ['d', num2str(k)];
 end
-t3 = array2table(dx', 'VariableNames', d_labels);
 for k=1:70
     v_labels{k} = ['v', num2str(k)];
 end
-t4 = array2table(vx', 'VariableNames', v_labels);
-output.array = [t2, t3, t4];
-output.variablenames = [{'no_voxels', 'min', 'max', 'mean'}, d_labels, v_labels];
+
+dvh.no_voxels = noVox;
+% dvh.min = d_min;
+% dvh.max = d_max;
+% dvh.mean = d_mean;
+
+for i=1:length(d_labels)
+  dvh.(d_labels{i}) = dx(i);
+end
+
+for i=1:length(v_labels)
+  dvh.(v_labels{i}) = vx(i);
+end
+
 %disp('DVHs calculated');
 end

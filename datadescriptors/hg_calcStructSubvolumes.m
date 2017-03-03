@@ -39,6 +39,6 @@ for i=1:length(fn)
     subvol_mean.(fn{i}) = mean([subvol_mean1.(fn{i}),subvol_mean2.(fn{i})]);
 end
 
-subvol_mean = struct2table(subvol_mean);
+% subvol_mean = struct2table(subvol_mean);
 
 end

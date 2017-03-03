@@ -17,30 +17,32 @@ if ischar(input_dir) % in case the user choose cancel
         path = fullfile(input_dir, dirnames{i}, 'features.csv');
         if ~recalcFeatures && exist(path, 'file')
             %load csv file
-            features = readtable(path, 'Delimiter', ';');
+            features_table = readtable(path);
             %fprintf('Features loaded from csv file!\n');
-        else
+        else          
             load(fullfile(input_dir, dirnames{i},'tps_data'));
             features = calculateFeatures(tps_data, 0);
-            writetable(features, path, 'Delimiter', ';');
+            features_table = cell2table(features(2:end, :));
+            features_table.Properties.VariableNames = features(1, :);
+            writetable(features_table, path);
         end
         
         ids = {};
-        for j=1:size(features,1)
+        for j=1:size(features_table,1)
             ids{j,1} = dirnames{i};
         end
         ids_table = table(ids, 'VariableNames', {'ID'});
         if exist('features_all', 'var')
-            features_all = [features_all; [ids_table, features]];
+            features_all = [features_all; [ids_table, features_table]];
         else
-            features_all = [ids_table, features];
+            features_all = [ids_table, features_table];
         end
     end
     path = fullfile(input_dir, 'features_all.csv');
     if exist(path, 'file')
         delete(path);
     end
-    writetable(features_all, path, 'Delimiter', ';');
+    writetable(features_all, path);
     if showGUI
         close(h)
     end

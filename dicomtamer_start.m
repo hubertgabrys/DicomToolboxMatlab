@@ -605,7 +605,9 @@ if get(handles.batch_tick, 'Value') == 0
     
     if isfield(handles, 'tps_data')
         features = calculateFeatures(handles.tps_data);
-        writetable(features, fullfile(handles.output_directory, 'features.csv'),'Delimiter',';');
+        features_table = cell2table(features(2:end, :));
+        features_table.Properties.VariableNames = features(1, :);
+        writetable(features_table, fullfile(handles.output_directory, 'features.csv'));
     else
         errordlg('Load tps.mat file first!','tps.mat error');
     end
