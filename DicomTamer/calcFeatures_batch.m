@@ -38,11 +38,29 @@ if ischar(input_dir) % in case the user choose cancel
             features_all = [ids_table, features_table];
         end
     end
+    % all features
     path = fullfile(input_dir, 'features_all.csv');
     if exist(path, 'file')
         delete(path);
     end
     writetable(features_all, path);
+    
+    % parotid features 1
+    fprintf('\n');
+    [features_parotids_all, features_parotids_all2] = get_parotid_features(path);
+    path = fullfile(input_dir, 'features_parotids_all.csv');
+    if exist(path, 'file')
+        delete(path);
+    end
+    writetable(features_parotids_all, path);
+    
+    % parotid features 2
+    path = fullfile(input_dir, 'features_parotids_all2.csv');
+    if exist(path, 'file')
+        delete(path);
+    end
+    writetable(features_parotids_all2, path);
+    
     if showGUI
         close(h)
     end
