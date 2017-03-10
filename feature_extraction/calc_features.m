@@ -10,7 +10,7 @@ end
 
 organ = 'parotid';
 
-dose_cube = tps_data.dose.cube;
+% dose_cube = tps_data.dose.cube;
 xspac = tps_data.dose.xVec(2)-tps_data.dose.xVec(1);
 yspac = tps_data.dose.yVec(2)-tps_data.dose.yVec(1);
 zspac = tps_data.dose.zVec(2)-tps_data.dose.zVec(1);
@@ -28,6 +28,7 @@ for i=1:length(strucnames)
     end
     
     % load structure dosecube
+    dose_cube = tps_data.dose.cube;
     struct_cube = load_cube(tps_data, strucname, 'dose' );
     struct_cube_msk = struct_cube>0;
     struct_indicator_msk = tps_data.structures.(strucname).indicator_mask;
