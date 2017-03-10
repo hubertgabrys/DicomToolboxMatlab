@@ -9,8 +9,8 @@ function output = calc_moments(struct_dc, mom_def)
 %
 % http://www.pt.ntu.edu.tw/hmchai/PTglossary/kines.files/CardinalPlane.gif
 %
-% Hubert Gabrys <hubert.gabrys@gmail.com>, 2015-2016
-% This file is licensed under GPLv2
+% Hubert Gabrys <hubert.gabrys@gmail.com>
+% License: MIT
 %
 
 interp_interval = 1; % it shouldn't be hardcoded. What's more it should be 

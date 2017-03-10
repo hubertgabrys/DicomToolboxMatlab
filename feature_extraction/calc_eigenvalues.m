@@ -1,8 +1,7 @@
 function [ eigvals, covmat ] = calc_eigenvalues( struct_cube_mask, xspacing, yspacing, zspacing )
 %
 % Hubert Gabrys <hubert.gabrys@gmail.com>, 2015-2016
-% This file is licensed under GPLv2
-%
+% License: MIT
 
 V = struct_cube_mask;
        

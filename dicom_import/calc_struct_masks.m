@@ -5,8 +5,8 @@ function structures = calc_struct_masks(rtss_path, xVec, yVec, zVec)
 % in Schenk et al., Efficient semiautomatic segmentation of 3D objects in
 % medical images.
 %
-% Hubert Gabrys <h.gabrys@dkfz.de>, 2015-2016
-% This file is licensed under GPLv2
+% Hubert Gabrys <hubert.gabrys@gmail.com>
+% License: MIT
 %
 
 % structures to skip

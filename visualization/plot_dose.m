@@ -1,7 +1,7 @@
 function slice = plot_dose( tps_data, selected_structures, slice, contourcolor, ax )
 %
-% Hubert Gabrys <h.gabrys@dkfz.de>, 2014-15
-% This file is licensed under GPLv2
+% Hubert Gabrys <hubert.gabrys@gmail.com>
+% License: MIT
 %
 
 cube = tps_data.dose.cube;
