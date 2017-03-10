@@ -78,9 +78,12 @@ eccentricity = 1-sqrt(min(eigenvals)/max(eigenvals));
 end
 
 function compactness = calc_compactness( struct_cube_mask, xspac, yspac, zspac  )
-eigvals = calc_eigenvalues( struct_cube_mask, xspac, yspac, zspac );
+% eigvals = calc_eigenvalues( struct_cube_mask, xspac, yspac, zspac );
+% volume = calc_volume(struct_cube_mask, xspac, yspac, zspac);
+% compactness = 6*prod(eigvals)/volume;
+area = calc_area(struct_cube_mask, xspac, yspac, zspac);
 volume = calc_volume(struct_cube_mask, xspac, yspac, zspac);
-compactness = 6*prod(eigvals)/volume;
+compactness = area/volume;
 end
 
 function density = calc_density(struct_cube_mask, xspac, yspac, zspac  )

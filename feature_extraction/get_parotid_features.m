@@ -69,7 +69,7 @@ features_parotids2.ID = str2double(cellfun(@(x) x(3:5), features_parotids2.ID,..
     'UniformOutput', false));
 features_parotids2.Properties.VariableNames{1} = 'MyPatientID';
 
-fprintf(repmat('\b',1,7)); % this is to erase progress tool
+fprintf(repmat('\b',1,7)); % this is to erase the progress tool
 fprintf('DONE\n');
 end
 
