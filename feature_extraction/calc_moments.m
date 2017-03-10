@@ -215,10 +215,6 @@ function m = calc_mom3d(V,p,q,r,inv, varargin)
 % V - volume
 % p,g,r - moment numbers
 % inv - invariance
-%
-% Hubert Gabrys <hubert.gabrys@gmail.com>, 2015-2016
-% This file is licensed under GPLv2
-%
 
 if length(varargin) == 3
     xspac = varargin{1};

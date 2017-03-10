@@ -6,8 +6,8 @@ function [cube, xVec, yVec, zVec] = load_dose_cube(file_path)
 % Inferior->Superior)
 % http://www.itk.org/Wiki/images/thumb/f/f8/ImageOrientationStandard.png/800px-ImageOrientationStandard.png
 %
-% Hubert Gabrys <hubert.gabrys@gmail.com>, 2015-2016
-% This file is licensed under GPLv2
+% Hubert Gabrys <hubert.gabrys@gmail.com>
+% License: MIT
 %
 
 dicom_info = dicominfo(file_path);
