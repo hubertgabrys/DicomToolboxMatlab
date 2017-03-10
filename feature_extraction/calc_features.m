@@ -1,4 +1,4 @@
-function output = calc_features( tps_data, verbose )
+function output = calc_features( tps_data, organ, verbose)
 %calculateFeatures calls various functions to calculate dosimetric and ct
 %descriptors of the rt structures.
 %   tps_data - ct, dosimetric, and structure data from the tps
@@ -6,9 +6,12 @@ function output = calc_features( tps_data, verbose )
 
 if nargin < 2
 	verbose = 1;
+    organ = 'all';
 end
 
-organ = 'parotid';
+if nargin < 3
+	verbose = 1;
+end
 
 % dose_cube = tps_data.dose.cube;
 xspac = tps_data.dose.xVec(2)-tps_data.dose.xVec(1);
@@ -16,7 +19,7 @@ yspac = tps_data.dose.yVec(2)-tps_data.dose.yVec(1);
 zspac = tps_data.dose.zVec(2)-tps_data.dose.zVec(1);
 strucnames = fieldnames(tps_data.structures);
 
-if strcmp(organ, 'parotid')
+if strcmp(organ, 'parotids')
     [parotidL_name, parotidR_name] = findLRparotids(strucnames);
     strucnames = {parotidL_name, parotidR_name}';
 end
@@ -33,7 +36,7 @@ for i=1:length(strucnames)
     struct_cube_msk = struct_cube>0;
     struct_indicator_msk = tps_data.structures.(strucname).indicator_mask;
     
-    if strcmp(organ, 'parotid')
+    if strcmp(organ, 'parotids')
         parotidL_cube = load_cube(tps_data, parotidL_name, 'dose' );
         parotidR_cube = load_cube(tps_data, parotidR_name, 'dose' );
         if mean(parotidR_cube(parotidR_cube>0)) > mean(parotidL_cube(parotidL_cube>0))

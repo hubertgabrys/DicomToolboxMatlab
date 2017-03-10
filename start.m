@@ -22,7 +22,7 @@ function varargout = start(varargin)
 
 % Edit the above text to modify the response to help start
 
-% Last Modified by GUIDE v2.5 06-Mar-2017 19:32:17
+% Last Modified by GUIDE v2.5 10-Mar-2017 21:26:23
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -588,6 +588,7 @@ start();
 
 % --- Executes on button press in calcFeatures.
 function calcFeatures_Callback(hObject, eventdata, handles)
+organ = handles.organ.String(handles.organ.Value, :);
 if get(handles.batch_tick, 'Value') == 0
     % show the hourglass during computation
     oldpointer = get(handles.figure1, 'pointer');
@@ -595,7 +596,7 @@ if get(handles.batch_tick, 'Value') == 0
     drawnow;
     
     if isfield(handles, 'tps_data')
-        features = calc_features(handles.tps_data);
+        features = calc_features(handles.tps_data, organ);
         features_table = cell2table(features(2:end, :));
         features_table.Properties.VariableNames = features(1, :);
         writetable(features_table, fullfile(handles.output_directory, 'features.csv'));
@@ -611,7 +612,7 @@ else
     input_dir = uigetdir(handles.defaultdatapath, 'Choose Input Directory...');
     showGUI = true;
     recalcFeatures = false;
-    calc_features_batch( input_dir, recalcFeatures, showGUI);
+    calc_features_batch( input_dir, organ, recalcFeatures, showGUI);
 end
 
 
@@ -1130,3 +1131,26 @@ function structure50_checkbox_Callback(hObject, eventdata, handles)
 % Hint: get(hObject,'Value') returns toggle state of structure32_checkbox
 checkboxmanager(50, hObject, eventdata, handles);
 
+
+
+% --- Executes on selection change in organ.
+function organ_Callback(hObject, eventdata, handles)
+% hObject    handle to organ (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: contents = cellstr(get(hObject,'String')) returns organ contents as cell array
+%        contents{get(hObject,'Value')} returns selected item from organ
+
+
+% --- Executes during object creation, after setting all properties.
+function organ_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to organ (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: popupmenu controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end

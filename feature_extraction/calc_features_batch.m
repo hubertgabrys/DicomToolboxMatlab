@@ -1,4 +1,4 @@
-function features_all = calc_features_batch( input_dir, recalcFeatures, showGUI )
+function features_all = calc_features_batch( input_dir, organ, recalcFeatures, showGUI )
 
 if ischar(input_dir) % in case the user choose cancel
     fprintf('Calculating features for all VOIs...');
@@ -21,7 +21,7 @@ if ischar(input_dir) % in case the user choose cancel
             %fprintf('Features loaded from csv file!\n');
         else          
             load(fullfile(input_dir, dirnames{i},'tps_data'));
-            features = calc_features(tps_data, 0);
+            features = calc_features(tps_data, organ, 0);
             features_table = cell2table(features(2:end, :));
             features_table.Properties.VariableNames = features(1, :);
             writetable(features_table, path);
