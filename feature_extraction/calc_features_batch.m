@@ -1,4 +1,7 @@
 function features_all = calc_features_batch( input_dir, organ, recalcFeatures, showGUI )
+%calc_features_batch calculates features for all patients present in
+% 'input_dir'. It also generates csv files containing features for parotid
+% glands only.
 
 if ischar(input_dir) % in case the user choose cancel
     fprintf('Calculating features for all VOIs...');
@@ -45,21 +48,23 @@ if ischar(input_dir) % in case the user choose cancel
     end
     writetable(features_all, path);
     
-    % parotid features 1
+    % parotid features
     fprintf('\n');
-    [features_parotids_all, features_parotids_all2] = get_parotid_features(path);
-    path = fullfile(input_dir, 'features_parotids_all.csv');
-    if exist(path, 'file')
-        delete(path);
-    end
-    writetable(features_parotids_all, path);
+    [feat_par_lr, feat_par_ic] = get_parotid_features(path);
     
-    % parotid features 2
-    path = fullfile(input_dir, 'features_parotids_all2.csv');
+    % parotid features left right
+    path = fullfile(input_dir, 'features_parotids_lr.csv');
     if exist(path, 'file')
         delete(path);
     end
-    writetable(features_parotids_all2, path);
+    writetable(feat_par_lr, path);
+    
+    % parotid features ipsilateral contralateral
+    path = fullfile(input_dir, 'features_parotids_ic.csv');
+    if exist(path, 'file')
+        delete(path);
+    end
+    writetable(feat_par_ic, path);
     
     if showGUI
         close(h)

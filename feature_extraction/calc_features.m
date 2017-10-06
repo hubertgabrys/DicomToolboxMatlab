@@ -39,8 +39,8 @@ for i=1:length(strucnames)
     struct_indicator_msk = tps_data.structures.(strucname).indicator_mask;
     
     if strcmp(organ, 'parotids')
-        parotidL_cube = load_cube(tps_data, parotidL_name, 'dose' );
-        parotidR_cube = load_cube(tps_data, parotidR_name, 'dose' );
+        parotidL_cube = crop_cube(tps_data, parotidL_name, 'dose' );
+        parotidR_cube = crop_cube(tps_data, parotidR_name, 'dose' );
         if mean(parotidR_cube(parotidR_cube>0)) > mean(parotidL_cube(parotidL_cube>0))
             % flip cube if ipsigland on the right
             struct_cube = flip(struct_cube, 2);
