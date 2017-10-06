@@ -2,6 +2,8 @@ function output = calc_features( tps_data, organ, verbose)
 %calculateFeatures calls various functions to calculate dosimetric and ct
 %descriptors of the rt structures.
 %   tps_data - ct, dosimetric, and structure data from the tps
+%   organ - 'all': calculate features for all structures, 'parotids':
+%   calcualte features just for parotid glands
 %   strucnames - names of rt structures
 
 if nargin < 2
@@ -183,42 +185,6 @@ struct_xgv = x1gv;
 struct_ygv = x2gv;
 struct_zgv = x3gv;
 end
-
-
-function [parotidL_name, parotidR_name] = findLRparotids(list_of_structures)
-parotid_indices1 = ~cellfun(@isempty, regexpi(list_of_structures, 'paroti'));
-parotid_indices2 = ~cellfun(@isempty, regexpi(list_of_structures, 'PARPTOS_RE'));
-parotid_indices = (parotid_indices1+parotid_indices2)>=1;
-
-parotids = list_of_structures(parotid_indices);
-
-if length(parotids) > 2 % get rid of parotis hilfe, partois boost, etc.
-    proper_parotids_ind = true(length(parotids),1);
-    for i=1:length(parotids)
-        if ~isempty(regexpi(parotids{i}, '[B,H]'))
-            % remove this index
-            proper_parotids_ind(i) = 0;
-        end
-    end
-    parotids = parotids(proper_parotids_ind,:);
-end
-if length(parotids) == 2 % flip cellarray in a way that parotidL is always first
-    if ~isempty(regexpi(parotids{1}, '_L')) && ~isempty(regexpi(parotids{2}, '_R'))
-    elseif ~isempty(regexpi(parotids{1}, '_R')) && ~isempty(regexpi(parotids{2}, '_L'))
-        parotids = flip(parotids);
-    elseif ~isempty(regexpi(parotids{1}, 'L'))
-    elseif ~isempty(regexpi(parotids{2}, 'L'))
-        parotids = flip(parotids);
-    else
-        error('Problem with recoqnizing left and right parotid!');
-    end
-else
-    error('Problem with recognizing parotid structures!');
-end
-parotidL_name = parotids{1};
-parotidR_name = parotids{2};
-end
-
 
 function progress_tool(currentIndex, totalNumberOfEvaluations)
 if (currentIndex > 1 && nargin < 3)

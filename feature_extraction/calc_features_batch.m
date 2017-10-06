@@ -68,3 +68,86 @@ end
 fprintf(repmat('\b',1,7));
 fprintf('DONE\n');
 end
+
+function [feat_par_oryg, feat_par_ic] = get_parotid_features(input_path)
+%get_parotid_features extract features of parotids from the input csv file
+% containing features of all structures. It outputs: 'feat_par_oryg' which
+% contains parotid features in the same format as in the input csv file 
+% (ie. each parotid in a separate row) and 'feat_par_ic' which contains
+% features of both parotid glands in a single row. 'i_' and 'c_' prefixes
+% are added to feature names to indicate ipsipalteral and contralateral
+% parotid, respectively.
+
+fprintf('Extracting all parotid features...');
+
+features_all = readtable(input_path);
+patlist = unique(features_all.ID);
+for i=1:length(patlist)
+    %fprintf('%s\n',patlist{i});
+    progress_tool(i,length(patlist));
+    features = features_all(strcmp(features_all.ID, patlist{i}),:);
+    list_of_structures = features.strucname;
+    
+    % recognize left and right parotid
+    [parotidL_name, parotidR_name] = findLRparotids(list_of_structures);
+    parotidL = features(strcmp(features.strucname, parotidL_name),:);
+    parotidR = features(strcmp(features.strucname, parotidR_name),:);
+    
+    if i == 1
+        feat_par_oryg = [parotidL; parotidR];
+    else
+        feat_par_oryg = [feat_par_oryg; [parotidL; parotidR]];
+    end
+    
+    % add '_r' and '_l' to variable names of right and left parotid
+    parotidR.Properties.VariableNames(3:end) = ...
+        cellfun(@(x) ['r_', x],parotidR.Properties.VariableNames(3:end),...
+        'UniformOutput', false);
+    parotidL.Properties.VariableNames(3:end) = ...
+        cellfun(@(x) ['l_', x],parotidL.Properties.VariableNames(3:end),...
+        'UniformOutput', false);
+    
+    parotidR.strucname = [];
+    parotidL.strucname = [];
+    
+    % decide which one is ipsilateral
+    if parotidR.r_mean > parotidL.l_mean
+        ipsiparotid = 'right';
+        parotidI = parotidR;
+        parotidC = parotidL;
+    else
+        ipsiparotid = {'left'};
+        parotidI = parotidL;
+        parotidC = parotidR;
+    end
+    
+    % add 'i_' and 'c_' to variable names of ipsi and contra parotids
+    parotidI.Properties.VariableNames(2:end) = ...
+        cellfun(@(x) ['i_', x(3:end)],parotidI.Properties.VariableNames(2:end),...
+        'UniformOutput', false);
+    parotidC.Properties.VariableNames(2:end) = ...
+        cellfun(@(x) ['c_', x(3:end)],parotidC.Properties.VariableNames(2:end),...
+        'UniformOutput', false);
+    
+    %output
+    foo.ipsiparotid = ipsiparotid;
+    if i == 1
+        %feat_par_ic = [parotidL, parotidR(:,2:end), parotidI(:,2:end), parotidC(:,2:end)];
+        feat_par_ic = [parotidI(:,1), struct2table(foo), parotidI(:,2:end),...
+            parotidC(:,2:end)];
+    else
+        %feat_par_ic = [feat_par_ic; [parotidL, parotidR(:,2:end), parotidI(:,2:end), parotidC(:,2:end)]];
+        feat_par_ic = [feat_par_ic; [parotidI(:,1), struct2table(foo),...
+            parotidI(:,2:end), parotidC(:,2:end)]];
+    end
+end
+feat_par_oryg.ID = str2double(cellfun(@(x) x(3:5), feat_par_oryg.ID,...
+    'UniformOutput', false));
+feat_par_oryg.Properties.VariableNames{1} = 'MyPatientID';
+feat_par_ic.ID = str2double(cellfun(@(x) x(3:5), feat_par_ic.ID,...
+    'UniformOutput', false));
+feat_par_ic.Properties.VariableNames{1} = 'MyPatientID';
+
+fprintf(repmat('\b',1,7)); % this is to erase the progress tool
+fprintf('DONE\n');
+end
