@@ -607,7 +607,7 @@ if get(handles.batch_tick, 'Value') == 0
     set(handles.figure1, 'pointer', oldpointer);
     drawnow;
 else
-    h = warndlg('DicomTamer will load features from xls files if found in patients'' directories. If you want to calculate all features from scratch, delete the xls files first!');
+    h = warndlg('DicomToolboxMatlab will load features from the csv files if found in patients'' directories. If you want to calculate all features from scratch, delete the csv files first!');
     uiwait(h);
     input_dir = uigetdir(handles.defaultdatapath, 'Choose Input Directory...');
     showGUI = true;
