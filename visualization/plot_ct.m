@@ -37,8 +37,8 @@ if showScale
     colorbar(ax, 'location','eastoutside');
 end
 if showLabels
-    xlabel(ax, {'2d: right -> left'});
-    ylabel(ax, {'1d: posterior <- anterior'});
+    xlabel(ax, {'X: right -> left'});
+    ylabel(ax, {'Y: posterior <- anterior'});
 end
 axis(ax, [min(xVec) max(xVec) min(yVec) max(yVec)])
 view(ax, 0,-90)
