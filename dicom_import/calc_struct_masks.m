@@ -135,11 +135,20 @@ end
 %struc_name = dicom_struc_info.StructureSetROISequence.(...
 %    list_of_defined_struc{roinumber}).ROIName;
 % change nonalphanumeric characters to underscore
+struc_name_oryg = struc_name;
 struc_name(~isstrprop(struc_name, 'alphanum')) = '_';
 struc_name = regexprep(struc_name,'[^a-zA-Z0-9]','_');
 while strcmp(struc_name(end),'_')
-    struc_name(end) = '';
+    struc_name = [struc_name, 'ux'];
 end
+while strcmp(struc_name(1),'_')
+    struc_name = ['ux', struc_name];
+end
+% if ~strcmp(struc_name_oryg,struc_name)
+%     fprintf('\n')
+%     fprintf([struc_name_oryg, ' changed to ', struc_name, '\n'])
+% end
+    
 % change all characters to lowercase
 struc_name = lower(struc_name);
 
