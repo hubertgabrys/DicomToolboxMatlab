@@ -36,7 +36,11 @@ if ischar(input_dir) % in case the user choose cancel
         end
         ids_table = table(ids, 'VariableNames', {'ID'});
         if exist('features_all', 'var')
-            features_all = [features_all; [ids_table, features_table]];
+            try
+                features_all = [features_all; [ids_table, features_table]];
+            catch
+                error('Problem stacking the features.');
+            end
         else
             features_all = [ids_table, features_table];
         end
@@ -146,11 +150,9 @@ for i=1:length(patlist)
             parotidI(:,2:end), parotidC(:,2:end)]];
     end
 end
-feat_par_oryg.ID = str2double(cellfun(@(x) x(3:5), feat_par_oryg.ID,...
-    'UniformOutput', false));
+feat_par_oryg.ID = cellfun(@(x) str2double(regexp(x, '\d+', 'match')), feat_par_oryg.ID, 'UniformOutput', false);
 feat_par_oryg.Properties.VariableNames{1} = 'MyPatientID';
-feat_par_ic.ID = str2double(cellfun(@(x) x(3:5), feat_par_ic.ID,...
-    'UniformOutput', false));
+feat_par_ic.ID = cellfun(@(x) str2double(regexp(x, '\d+', 'match')), feat_par_ic.ID, 'UniformOutput', false);
 feat_par_ic.Properties.VariableNames{1} = 'MyPatientID';
 
 fprintf(repmat('\b',1,7)); % this is to erase the progress tool
