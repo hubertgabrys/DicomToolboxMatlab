@@ -27,7 +27,7 @@ for i = 1:length(input_files_list) % for every file of a given patient
     fprintf('\t%d: %s\n', i, input_files_list(i).name); % print the name of the file
     %% load dicominfo
     input_file_filename = input_files_list(i).name; % get name of  a file
-    input_file_dicominfo = dicominfo([input_directory input_file_filename]); 
+    input_file_dicominfo = read_dicominfo([input_directory input_file_filename], true, false); 
     %% modify dicominfo
     input_file_dicominfo = fillOutMissingIDs(input_file_dicominfo);
     input_file_dicominfo = replaceNonalphanumericSymbols(input_file_dicominfo);
@@ -120,7 +120,7 @@ function anonymizeDicomFields
 end
 
 function input_file_dicominfo = loadDicomInfo(input_directory, filename)
-    input_file_dicominfo = dicominfo([input_directory filename]);
+    input_file_dicominfo = read_dicominfo([input_directory filename], true, false);
     %% take care of missing IDs
     if isempty(input_file_dicominfo.PatientID)
         input_file_dicominfo.PatientID = 'no_patientID';

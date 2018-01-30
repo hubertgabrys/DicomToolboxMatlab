@@ -10,7 +10,7 @@ function [cube, xVec, yVec, zVec] = load_dose_cube(file_path)
 % License: MIT
 %
 
-dicom_info = dicominfo(file_path);
+dicom_info = read_dicominfo(file_path, true, false);
 cube_o = dicomread(file_path);
 
 if ndims(cube_o) == 4

@@ -12,7 +12,7 @@ function [cube, xVec, yVec, zVec] = load_ct_cube(input_files_list)
 
 for i = 1:length(input_files_list) % for every file of a given patient
     %% load dicominfo
-    dicom_info = dicominfo(input_files_list{i});
+    dicom_info = read_dicominfo(input_files_list{i}, true, false);
     cube(:,:,i) = dicomread(dicom_info);
     zVec(i,1) = dicom_info.ImagePositionPatient(3);
 end

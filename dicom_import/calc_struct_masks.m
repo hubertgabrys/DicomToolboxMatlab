@@ -14,7 +14,7 @@ struct2skip = {'AUSSENKONTUR', 'SKIN'};
 %struct2skip = {''};
 
 % calculate structures' masks
-dicom_info = dicominfo(rtss_path);
+dicom_info = read_dicominfo(rtss_path, true, false);
 list_of_contoured_strucs = fieldnames(dicom_info.ROIContourSequence);
 for j = 1:length(list_of_contoured_strucs) % for every contoured structure
     roinumber  = dicom_info.ROIContourSequence.(list_of_contoured_strucs{j}).ReferencedROINumber;

@@ -20,7 +20,7 @@ if ~isempty(fileList)
     for i = numOfFiles:-1:1
         %waitbar((numOfFiles+1-i) / steps)
         try 
-            info = dicominfo(fileList{i});
+            info = read_dicominfo(fileList{i}, true, false);
         catch
             fileList(i,:) = [];
             continue;
