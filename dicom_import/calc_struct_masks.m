@@ -22,7 +22,12 @@ for j = 1:length(list_of_contoured_strucs) % for every contoured structure
     if nnz(ismember(struct2skip, struct_name)) % don't calculate structures defined in struct2skip
         continue;
     end
-    list_of_slices = fieldnames(dicom_info.ROIContourSequence.(list_of_contoured_strucs{j}).ContourSequence);
+    try
+        list_of_slices = fieldnames(dicom_info.ROIContourSequence.(list_of_contoured_strucs{j}).ContourSequence);
+    catch
+        % warning('Reference to non-existent field ContourSequence. Moving to the next structure.');
+        continue;
+    end
     %i = 0;
     %zCoords = zeros(length(list_of_slices),1);
     temp_struct_mask = zeros(0);
